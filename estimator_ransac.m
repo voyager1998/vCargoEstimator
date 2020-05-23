@@ -7,6 +7,18 @@ addpath(['/home/',getenv('USER'),'/vCargoEstimator/utils']);
 load('sample_input.mat');
 image_counter = 1;
 
+figure(image_counter);
+image_counter = image_counter + 1;
+imagesc(I)
+set(gca,'dataAspectRatio',[1 1 1])
+title('RGB')
+
+figure(image_counter);
+image_counter = image_counter + 1;
+imagesc(D)
+set(gca,'dataAspectRatio',[1 1 1])
+title('Depth')
+
 %% Construct Point Cloud
 pc = depth2pc(D, C);
 pcSize = size(pc, 1)*size(pc, 2);
