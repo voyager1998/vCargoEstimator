@@ -3,7 +3,8 @@ function ptcloud = tof2pc(D, C)
 s = size(D);
 w = s(1);
 h = s(2);
-ptcloud = [];
+ptcloud = zeros(w*h,3);
+n = 0;
 for i = 1: w
     for j = 1: h
         if D(i,j) > 1000
@@ -13,10 +14,12 @@ for i = 1: w
         z = double(D(i,j))*costheta;
         proj = [i*z; j*z; z];
         pos = C\proj;
-%         TODO: preallocate to make it faster
-        ptcloud = [ptcloud; pos'];
+
+        n = n+1;
+        ptcloud(n,:) = pos';
     end
 end
+ptcloud = ptcloud(1:n, :);
 end
 
 
