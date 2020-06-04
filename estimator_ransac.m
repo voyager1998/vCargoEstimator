@@ -2,7 +2,7 @@
 % Output: possible planes in the image
 
 %% Initialization, load depth image
-clear;
+clear; close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
@@ -12,7 +12,6 @@ D = D/16;
 load('calibration/fixorigincalibration.mat');
 C = cameraParams.IntrinsicMatrix';
 D_undistort = undistortImage(D,cameraParams);
-
 
 figure(image_counter);
 image_counter = image_counter + 1;
@@ -37,18 +36,21 @@ ylabel('Y')
 zlabel('Z')
 
 %% RANSAC
-pcSize = length(pc);
-pixel_ids = 1:pcSize;
-noise_ths = ones(1, pcSize) * 2;
 iterations = 100;
 subset_size = 3;
-[plane_model, outlier_ratio, plane_area, inliers] ...
-    = ransac_fitplane(pc, pixel_ids, noise_ths, iterations, subset_size);
 
-figure(image_counter);
-image_counter = image_counter + 1;
-pcshow(inliers)
-title('inliers')
-xlabel('X')
-ylabel('Y') 
-zlabel('Z')
+numplanes = 6;
+for i = 1:numplanes
+    noise_ths = ones(1, length(pc)) * 10;
+    [plane_model, outlier_ratio, plane_area, inliers, best_inliers] ...
+        = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
+    pc(best_inliers, :) = [];
+    
+    figure(image_counter);
+    image_counter = image_counter + 1;
+    pcshow(inliers)
+    title('inliers')
+    xlabel('X')
+    ylabel('Y') 
+    zlabel('Z')
+end
