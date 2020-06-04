@@ -11,7 +11,7 @@
 %   IEEE International Conference on Robotics and Automation, 2018
 % Please consider citing the paper if you use this code.
 
-function [plane_model, outlier_ratio, plane_area, inliers] ...
+function [plane_model, outlier_ratio, plane_area, inliers, outliers] ...
     = ransac_fitplane(pointcloud, pixel_ids, noise_ths, iterations, subset_size)
 
 pointcloud = pointcloud(pixel_ids, :);
@@ -22,21 +22,25 @@ subset_size = min(subset_size, s);
 homo_points = [pointcloud ones(s,1)]';
 max_inliers = 0;
 best_inliers  = [];
+outlier_pixel_ids = [];
 for i=1:iterations
     samples = datasample(pointcloud, subset_size);
     p = fitplane(samples');
     res = abs((p'*homo_points)./norm(p(1:3)));
     inliers = res < noise_ths;
+    outliers = res >= noise_ths;
     num_inliers = sum(inliers);
     if num_inliers > max_inliers
         max_inliers = num_inliers;
         best_inliers = inliers;
+        outlier_pixel_ids = outliers;
     end
 end
 if (iterations == 0)
     inliers = pointcloud;
 else
     inliers = pointcloud(best_inliers, :);
+    outliers = pointcloud(outlier_pixel_ids, :);
 end
 
 if size(inliers,1) < 3
