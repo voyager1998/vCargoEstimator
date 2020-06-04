@@ -3,9 +3,11 @@ s = size(D);
 w = s(1);
 h = s(2);
 ptcloud = zeros(s);
-% invC = inv(C);
 for i = 1: w
     for j = 1: h
+        if D(i,j) > 1000
+            continue;
+        end
         proj = [i*D(i,j); j*D(i,j); D(i,j)];
         proj = cast(proj,'double');
         pos = C\proj;
