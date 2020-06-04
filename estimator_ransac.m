@@ -11,6 +11,8 @@ D = imread(strcat(pwd, '/data/0605/DepthImage_0.png'));
 D = D/16;
 load('calibration/fixorigincalibration.mat');
 C = cameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,cameraParams);
+
 
 figure(image_counter);
 image_counter = image_counter + 1;
@@ -18,10 +20,14 @@ imagesc(D)
 set(gca,'dataAspectRatio',[1 1 1])
 title('Depth')
 
+figure(image_counter);
+image_counter = image_counter + 1;
+imagesc(D_undistort)
+set(gca,'dataAspectRatio',[1 1 1])
+title('Depth Undistorted')
+
 %% Construct Point Cloud
-pc = depth2pc(D, C);
-pcSize = size(pc, 1)*size(pc, 2);
-pc = reshape(pc, [pcSize, 3]);
+pc = tof2pc(D_undistort, C);
 figure(image_counter);
 image_counter = image_counter + 1;
 pcshow(pc)
@@ -31,6 +37,7 @@ ylabel('Y')
 zlabel('Z')
 
 %% RANSAC
+pcSize = length(pc);
 pixel_ids = 1:pcSize;
 noise_ths = ones(1, pcSize) * 2;
 iterations = 100;
