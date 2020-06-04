@@ -8,7 +8,7 @@ for i = 1: w
         if D(i,j) > 1000
             continue;
         end
-        proj = [i*D(i,j); j*D(i,j); D(i,j)];
+        proj = [i*double(D(i,j)); j*double(D(i,j)); double(D(i,j))];
         proj = cast(proj,'double');
         pos = C\proj;
         ptcloud(i,j,1) = pos(1);
