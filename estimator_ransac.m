@@ -39,18 +39,25 @@ zlabel('Z')
 iterations = 100;
 subset_size = 3;
 
+figure(image_counter);
+hold on;
+image_counter = image_counter + 1;
 numplanes = 6;
 for i = 1:numplanes
     noise_ths = ones(1, length(pc)) * 10;
     [plane_model, outlier_ratio, plane_area, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
     pc(best_inliers, :) = [];
-    
-    figure(image_counter);
-    image_counter = image_counter + 1;
-    pcshow(inliers)
-    title('inliers')
-    xlabel('X')
-    ylabel('Y') 
-    zlabel('Z')
+    pcshow(inliers, [bitshift(bitand(i,4),-2) bitshift(bitand(i,2),-1) bitand(i,1)]);
+%     figure(image_counter);
+%     image_counter = image_counter + 1;
+%     pcshow(inliers)
+%     title('inliers')
+%     xlabel('X')
+%     ylabel('Y')
+%     zlabel('Z')
 end
+title('inliers');
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
