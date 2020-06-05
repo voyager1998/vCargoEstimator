@@ -26,7 +26,7 @@ showExtrinsics(stereoParams);
 title('stereo extrinsics');
 
 %% Stereo Camera Calibration 
-%https://www.mathworks.com/help/vision/ref/stereoparameters.html
+% https://www.mathworks.com/help/vision/ref/stereocameracalibrator-app.html
 load('calibration/stereoCalibrationParam.mat');
 figure(image_counter);
 image_counter = image_counter + 1;
