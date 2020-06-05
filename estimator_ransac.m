@@ -9,9 +9,9 @@ addpath(strcat(pwd,'/utils'));
 addpath(strcat(pwd,'/calibration'));
 D = imread(strcat(pwd, '/data/0605/DepthImage_0.png'));
 D = D/16;
-load('calibration/fixorigincalibration.mat');
-C = cameraParams.IntrinsicMatrix';
-D_undistort = undistortImage(D,cameraParams);
+load('calibration/ir.mat');
+C = ircameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,ircameraParams);
 
 figure(image_counter);
 image_counter = image_counter + 1;
