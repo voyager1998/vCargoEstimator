@@ -53,13 +53,6 @@ for i = 1:numplanes
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
     pc(best_inliers, :) = [];
     pcshow(inliers, [bitshift(bitand(i,4),-2) bitshift(bitand(i,2),-1) bitand(i,1)]);
-%     figure(image_counter);
-%     image_counter = image_counter + 1;
-%     pcshow(inliers)
-%     title('inliers')
-%     xlabel('X')
-%     ylabel('Y')
-%     zlabel('Z')
 end
 title('inliers');
 xlabel('X');
