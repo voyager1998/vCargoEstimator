@@ -47,14 +47,34 @@ figure(image_counter);
 hold on;
 image_counter = image_counter + 1;
 numplanes = 4;
+plane_models = zeros(numplanes,4);
 for i = 1:numplanes
     noise_ths = ones(1, length(pc)) * 20;
-    [plane_model, outlier_ratio, plane_area, inliers, best_inliers] ...
+    [plane_models(i,:), outlier_ratio, plane_area, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
     pc(best_inliers, :) = [];
+    plane_points{i} = inliers;
     pcshow(inliers, [bitshift(bitand(i,4),-2) bitshift(bitand(i,2),-1) bitand(i,1)]);
 end
+% plane1 blue, plane2 green, plane3 cyan, plane4 red
 title('inliers');
 xlabel('X');
 ylabel('Y');
 zlabel('Z');
+
+%% calculate height
+figure(image_counter);
+hold on;
+image_counter = image_counter + 1;
+pcshow(plane_points{1});
+pcshow(plane_points{4});
+title('parallel planes for height calculation');
+height = plane_dist(plane_models(1,:), plane_models(4,:), plane_points{1}, plane_points{4});
+% height = 340.7499 / 341.3144
+
+%% calculate width and length
+figure(image_counter);
+image_counter = image_counter + 1;
+pcshow(plane_points{2});
+
+
