@@ -7,17 +7,11 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 addpath(strcat(pwd,'/calibration'));
-D = imread(strcat(pwd, '/data/0605/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/data0614/DepthImage_1.png'));
 D = D/16;
 load('calibration/ir.mat');
 C = ircameraParams.IntrinsicMatrix';
 D_undistort = undistortImage(D,ircameraParams);
-
-figure(image_counter);
-image_counter = image_counter + 1;
-imagesc(D)
-set(gca,'dataAspectRatio',[1 1 1])
-title('Depth')
 
 figure(image_counter);
 image_counter = image_counter + 1;
@@ -27,6 +21,7 @@ title('Depth Undistorted')
 
 %% Construct Point Cloud
 pc = tof2pc(D_undistort, C);
+pc(:,1) = -pc(:,1); %TODO: what causes this flip?
 figure(image_counter);
 image_counter = image_counter + 1;
 pcshow(pc)
@@ -48,7 +43,11 @@ hold on;
 image_counter = image_counter + 1;
 numplanes = 4;
 for i = 1:numplanes
-    noise_ths = ones(1, length(pc)) * 20;
+    inlier_thres = 20;
+    if (i == 1) 
+        inlier_thres = 30;
+    end
+    noise_ths = ones(1, length(pc)) * inlier_thres;
     [plane_model, outlier_ratio, plane_area, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
     pc(best_inliers, :) = [];

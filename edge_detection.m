@@ -3,29 +3,36 @@ clear; close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
+edge_thres = 0.1;
 
 
 %% Load RGB image; Compute edges
-RGB = imread(strcat(pwd, '/data/dataSmall/RGBImage_8.png'));
-
+RGB = imread(strcat(pwd, '/data/data0614/RGBImage_1.png'));
 % turn RGB to gray
 grayfromRGB = rgb2gray(RGB);
 
-edge_gray = edge(grayfromRGB,'canny');
+load('calibration/rgb.mat');
+C_rgb = rgbCameraParams.IntrinsicMatrix';
+rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
+
+edge_gray = edge(rgb_undistort,'canny', edge_thres);
 
 figure(image_counter);
 image_counter = image_counter + 1;
-imshow(edge_gray)
+imagesc(edge_gray)
 title('Edges in gray image')
 
 %% Load IR image; Compute edges
-IR = imread(strcat(pwd, '/data/dataSmall/GrayImage_8.png'));
+IR = imread(strcat(pwd, '/data/data0614/GrayImage_1.png'));
+load('calibration/ir.mat');
+C_ir = ircameraParams.IntrinsicMatrix';
+IR_undistort = undistortImage(IR,ircameraParams);
 
-edge_ir = edge(IR,'canny');
+edge_ir = edge(IR_undistort,'Canny', edge_thres);
 
 figure(image_counter);
 image_counter = image_counter + 1;
-imshow(edge_ir)
+imagesc(edge_ir)
 title('Edges in IR image')
 
 %% Compute intersection of edges
