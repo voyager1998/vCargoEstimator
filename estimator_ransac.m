@@ -64,38 +64,54 @@ zlabel('Z');
 
 %% calculate intersection line
 % plot the original planes
-syms X Y Z1 Z2
-p1=plane_models(1,:);
-scale1=1./p1(3); % scale factor before z to 1
-p1=scale1*p1;
-
-p2=plane_models(2,:);
-scale2=1./p2(3);
-p2=scale2*p2;
-
-[X,Y]=meshgrid(-500:50:500);
-Z1=-p1(1).*X-p1(2).*Y-p1(4);
-Z2=-p2(1).*X-p2(2).*Y-p2(4);
-surf(X,Y,Z1);
-hold on;
-surf(X,Y,Z2);
+% syms X Y Z1 Z2
+% p1=plane_models(1,:);
+% scale1=1./p1(3); % scale factor before z to 1
+% p1=scale1*p1;
+% 
+% p2=plane_models(2,:);
+% scale2=1./p2(3);
+% p2=scale2*p2;
+% 
+% [X,Y]=meshgrid(-500:50:500);
+% Z1=-p1(1).*X-p1(2).*Y-p1(4);
+% Z2=-p2(1).*X-p2(2).*Y-p2(4);
+% surf(X,Y,Z1);
+% hold on;
+% surf(X,Y,Z2);
 
 % find intersection line
-n1=p1(1:3);
-M1=[0,0,p1(4)];
-n2=p2(1:3);
-M2=[0,0,p2(4)];
-[I, u, rc] = planes_intersection(n1, M1, n2, M2, 1);
-% rc = 1 for line, 2 for plane, or 3 for void (p1//p2)
-% when intersection is line, return point I and the director vector u
+edges=zeros(numplanes.*(numplanes-1)./2-1, 6);
+k=1;
+for i=1:numplanes-1
+    for j=i+1:numplanes
+        p1=plane_models(i,:);
+        p2=plane_models(j,:);
+        n1=p1(1:3);
+        M1=[0,0,-p1(4)./p1(3)];
+        n2=p2(1:3);
+        M2=[0,0,-p2(4)./p2(3)];
+        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5
+            continue
+        end
+        [I, u, rc] = planes_intersection(n1, M1, n2, M2, 1);
+        edges(k,:)=[I u]; % I point on line, u direction vector of line
+        k=k+1;
+        syms t
+        t=-500:500;
+        line = I'+t.*(u'/norm(u'));
+        plot3(line(1,:),line(2,:),line(3,:),'o');
+    end
+end
+hold off;
 
 %% calculate intersection point
-syms x y z
-v=[x;y;z;1];
-ekv1=plane_models(1,:)*v==0;
-ekv2=plane_models(2,:)*v==0;
-ekv3=plane_models(3,:)*v==0;
-xyz = solve([ekv1, ekv2, ekv3]);
+% syms x y z
+% v=[x;y;z;1];
+% ekv1=plane_models(1,:)*v==0;
+% ekv2=plane_models(2,:)*v==0;
+% ekv3=plane_models(3,:)*v==0;
+% xyz = solve([ekv1, ekv2, ekv3]);
 
 %% calculate height
 figure(image_counter);
