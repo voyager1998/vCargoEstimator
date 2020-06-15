@@ -1,12 +1,12 @@
 % Refer to the deduction below
 function ptcloud = tof2pc(D, C)
 s = size(D);
-w = s(1);
-h = s(2);
+h = s(1);
+w = s(2);
 ptcloud = zeros(w*h,3);
 n = 0;
-for i = 1: w
-    for j = 1: h
+for j = 1: w
+    for i = 1: h
         if D(i,j) > 1000
             continue;
         end
