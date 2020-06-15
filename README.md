@@ -22,3 +22,6 @@ System parameter requirements:
 ## Expected Deliverable
 1. Indoor environment, accurately measure the side length of the goods, the unilateral error is less than 3 ‰. 
 2. Indoor environment, accurately measure the volume of the goods, the error is less than 1%.
+
+## Notes
+1. ColorSpec (Color Specification) https://www.mathworks.com/help/matlab/ref/colorspec.html
