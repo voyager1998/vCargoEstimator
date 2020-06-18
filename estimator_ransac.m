@@ -91,7 +91,7 @@ for i=1:numplanes-1
         M1=[0,0,-p1(4)./p1(3)];
         n2=p2(1:3);
         M2=[0,0,-p2(4)./p2(3)];
-        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5
+        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5 % parallel planes
             continue
         end
         [I, u, rc] = planes_intersection(n1, M1, n2, M2, 1);
