@@ -39,7 +39,7 @@ grayfromRGB = histeq(grayfromRGB);
 % title('Thirty strongest SURF features in I2');
 
 %% Rectify based on calibration
-% load('calibration/stereoCalibrationParams0618_2.mat');
+load('calibration/panasonicStereoParams.mat');
 [RGBRect, IRRect] = rectifyStereoImages(grayfromRGB, IR, stereoParams, 'OutputView','full');
 figure(image_counter);
 image_counter = image_counter + 1;
