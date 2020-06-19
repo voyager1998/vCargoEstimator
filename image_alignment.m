@@ -67,24 +67,20 @@ set(gca,'dataAspectRatio',[1 1 1])
 title('registered depth images');
 
 %intersection=intersect(D1,D2_registered);
-s = size(D1);
-w = s(1);
-h = s(2);
-intersection=zeros(w,h);
-for i = 1: w
-    for j = 1: h
-        if (abs(D1(i,j)-D2_registered(i,j))<30)
-            intersection(i,j)=0.5.*(D1(i,j)+D2_registered(i,j));
-        else
-            intersection(i,j)=4095;
-        end
-    end
-end
-figure(image_counter);
-image_counter = image_counter + 1;
-imagesc(intersection)
-set(gca,'dataAspectRatio',[1 1 1])
-title('registered depth images');
+% s = size(D1);
+% w = s(1);
+% h = s(2);
+% intersection=zeros(w,h);
+% for i = 1: w
+%     for j = 1: h
+%         intersection(i,j)=0.5.*(D1(i,j)+D2_registered(i,j));
+%     end
+% end
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% imagesc(intersection)
+% set(gca,'dataAspectRatio',[1 1 1])
+% title('registered depth images');
 
 pc_original = tof2pc(D1, C);
 figure(image_counter);
