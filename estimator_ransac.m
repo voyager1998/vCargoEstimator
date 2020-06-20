@@ -83,6 +83,7 @@ zlabel('Z');
 % find intersection line
 edges=zeros(numplanes.*(numplanes-1)./2-1, 6);
 k=1;
+parallel_planes=[1,2];
 for i=1:numplanes-1
     for j=i+1:numplanes
         p1=plane_models(i,:);
@@ -92,6 +93,8 @@ for i=1:numplanes-1
         n2=p2(1:3);
         M2=[0,0,-p2(4)./p2(3)];
         if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5 % parallel planes
+            parallel_planes(1)=i;
+            parallel_planes(2)=j;
             continue
         end
         [I, u, rc] = planes_intersection(n1, M1, n2, M2, 1);
@@ -117,15 +120,40 @@ hold off;
 figure(image_counter);
 hold on;
 image_counter = image_counter + 1;
-pcshow(plane_points{1});
-pcshow(plane_points{4});
+pcshow(plane_points{parallel_planes(1)});
+pcshow(plane_points{parallel_planes(2)});
 title('parallel planes for height calculation');
 height = plane_dist(plane_models(1,:), plane_models(4,:), plane_points{1}, plane_points{4});
 % height = 340.7499 / 341.3144
 
 %% calculate width and length
+poi = plane_points{2};
+poi = pointCloud(poi);
 figure(image_counter);
 image_counter = image_counter + 1;
-pcshow(plane_points{2});
+pcshow(poi);
 
+[poi,inlierIndices,outlierIndices] = pcdenoise(poi, 'Threshold', 0.001);
+pt = poi.Location;
+
+%% fit rectangle
+poi = plane_points{2};
+% using downsamople
+% poi = pointCloud(poi);
+% gridStep = 20;
+% poi = pcdownsample(poi,'gridAverage',gridStep);
+% poi = pcdownsample(poi,'random',0.1);
+
+% using boundary
+% x=poi(:,1);
+% y=poi(:,2);
+% iterations = 20;
+% for i=1:iterations
+%     b=boundary(x,y,1);
+%     if i==iterations
+%         plot(x(b),y(b));
+%     end
+%     x(b,:)=[];
+%     y(b,:)=[];
+% end
 
