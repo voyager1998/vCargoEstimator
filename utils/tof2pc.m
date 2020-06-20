@@ -12,7 +12,7 @@ for j = 1: w
         end
         costheta = 1/sqrt( ((i-C(1,3))/C(1,1))^2 + ((j-C(2,3))/C(2,2))^2 + 1);
         z = double(D(i,j))*costheta;
-        proj = [i*z; j*z; z];
+        proj = [j*z; i*z; z];
         pos = C\proj;
 
         n = n+1;

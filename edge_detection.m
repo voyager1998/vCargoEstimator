@@ -1,5 +1,6 @@
 %% Initialization
-clear; close all;
+clear; 
+close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
@@ -7,7 +8,7 @@ edge_thres = 0.1;
 
 
 %% Load RGB image; Compute edges
-RGB = imread(strcat(pwd, '/data/data0614/RGBImage_1.png'));
+RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_2.png'));
 % turn RGB to gray
 grayfromRGB = rgb2gray(RGB);
 
@@ -23,7 +24,7 @@ imagesc(edge_gray)
 title('Edges in gray image')
 
 %% Load IR image; Compute edges
-IR = imread(strcat(pwd, '/data/data0614/GrayImage_1.png'));
+IR = imread(strcat(pwd, '/data/data0618_1/GrayImage_2.png'));
 load('calibration/ir.mat');
 C_ir = ircameraParams.IntrinsicMatrix';
 IR_undistort = undistortImage(IR,ircameraParams);

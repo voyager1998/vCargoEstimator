@@ -7,7 +7,7 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 addpath(strcat(pwd,'/calibration'));
-D = imread(strcat(pwd, '/data/data0614/DepthImage_1.png'));
+D = imread(strcat(pwd, '/data/data0618_1/DepthImage_2.png'));
 D = D/16;
 load('calibration/ir.mat');
 C = ircameraParams.IntrinsicMatrix';
@@ -21,7 +21,6 @@ title('Depth Undistorted')
 
 %% Construct Point Cloud
 pc = tof2pc(D_undistort, C);
-pc(:,1) = -pc(:,1); %TODO: what causes this flip?
 figure(image_counter);
 image_counter = image_counter + 1;
 pcshow(pc)
@@ -43,6 +42,7 @@ hold on;
 image_counter = image_counter + 1;
 numplanes = 4;
 plane_models = zeros(numplanes,4);
+plane_points{1,4} = [];
 for i = 1:numplanes
     inlier_thres = 20;
     if (i == 1) 
@@ -117,9 +117,9 @@ figure(image_counter);
 hold on;
 image_counter = image_counter + 1;
 pcshow(plane_points{1});
-pcshow(plane_points{4});
+pcshow(plane_points{2});
 title('parallel planes for height calculation');
-height = plane_dist(plane_models(1,:), plane_models(4,:), plane_points{1}, plane_points{4});
+height = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
 % height = 340.7499 / 341.3144
 
 %% calculate width and length

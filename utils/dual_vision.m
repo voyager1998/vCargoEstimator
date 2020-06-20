@@ -1,3 +1,7 @@
+% Use 
+% worldPoints = triangulate(matchedPoints1,matchedPoints2,stereoParams)
+% https://www.mathworks.com/help/vision/ref/triangulate.html
+
 % pt3d_ir in IR frame
 % irTrgb * pt3d_rgb = pt3d_ir
 % pt2d_ir: 1 * 2
