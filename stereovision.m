@@ -11,6 +11,11 @@ IR = imread(strcat(pwd, '/data/data0618_1/GrayImage_7.png'));
 % scale intensity of ir and gray image
 IR = histeq(IR);
 grayfromRGB = histeq(grayfromRGB);
+figure(image_counter);
+image_counter = image_counter + 1;
+imagesc(stereoAnaglyph(grayfromRGB, IR));
+set(gca,'dataAspectRatio',[1 1 1])
+title('Rectified Frames');
 % figure(image_counter);
 % image_counter = image_counter + 1;
 % imagesc(IR)
