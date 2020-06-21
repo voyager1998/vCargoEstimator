@@ -37,6 +37,7 @@ pc = originpc;
 iterations = 100;
 subset_size = 3;
 
+ransac_figure = image_counter;
 figure(image_counter);
 hold on;
 image_counter = image_counter + 1;
@@ -102,7 +103,7 @@ for i=1:numplanes-1
         plot3(line(1,:),line(2,:),line(3,:),'o');
     end
 end
-hold off;
+% hold off;
 
 %% calculate intersection point
 % syms x y z
@@ -122,9 +123,55 @@ title('parallel planes for height calculation');
 height = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
 % height = 340.7499 / 341.3144
 
-%% calculate width and length
+%% Load Depth image; Compute edges
+edge_thres = 0.1;
+edge_D = edge(D_undistort,'Canny', edge_thres);
+
 figure(image_counter);
 image_counter = image_counter + 1;
-pcshow(plane_points{2});
+imagesc(edge_D)
+title('Edges in Depth image')
+hold on
+%% RANSAC edge function based on Depth image
+[rows,cols] = find(edge_D == true);
+edge_pts = [rows,cols];
 
+sampleSize = 2; % number of points to sample per trial
+maxDistance = 2; % max allowable distance for inliers
+
+fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
+evalLineFcn = ...   % distance evaluation function
+  @(model, points) sum((points(:, 1) - polyval(model, points(:,2))).^2,2);
+
+[modelRANSAC, inlierIdx] = ransac(edge_pts,fitLineFcn,evalLineFcn, ...
+  sampleSize,maxDistance);
+x = 0:640;
+y = modelRANSAC(1)*x+modelRANSAC(2);
+plot(x,y)
+
+%% From edge to plane; Compute plane intersection
+figure(ransac_figure);
+pm = line2dTplane(modelRANSAC, C);
+
+% syms X Y Z1
+% scale1=1./pm(3); % scale factor before z to 1
+% pm=scale1*pm;
+% 
+% [X,Y]=meshgrid(-400:50:400);
+% Z1=-pm(1).*X-pm(2).*Y-pm(4);
+% surf(X,Y,Z1);
+
+p1=plane_models(2,:);
+n1=p1(1:3);
+M1=[0,0,-p1(4)./p1(3)];
+
+n2=pm(1:3);
+M2=[0,0,-pm(4)./pm(3)];
+[I, u, rc] = planes_intersection(n1, M1, n2', M2, 1);
+edges(k,:)=[I u]; % I point on line, u direction vector of line
+k=k+1;
+syms t
+t=-500:500;
+line = I'+t.*(u'/norm(u'));
+plot3(line(1,:),line(2,:),line(3,:),'o');
 

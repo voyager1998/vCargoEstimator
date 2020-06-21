@@ -1,4 +1,4 @@
-% Refer to the deduction below
+% A pixel (i, j) in image, i -> y, j -> x
 function ptcloud = tof2pc(D, C)
 s = size(D);
 h = s(1);
