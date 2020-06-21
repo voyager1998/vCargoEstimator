@@ -98,9 +98,9 @@ for i=1:numplanes-1
         edges(k,:)=[I u]; % I point on line, u direction vector of line
         k=k+1;
         syms t
-        t=-500:500;
+        t=-1500:1000;
         line = I'+t.*(u'/norm(u'));
-        plot3(line(1,:),line(2,:),line(3,:),'o');
+        plot3(line(1,:),line(2,:),line(3,:),'.');
     end
 end
 % hold off;
@@ -171,7 +171,13 @@ M2=[0,0,-pm(4)./pm(3)];
 edges(k,:)=[I u]; % I point on line, u direction vector of line
 k=k+1;
 syms t
-t=-500:500;
+t=-1500:1000;
 line = I'+t.*(u'/norm(u'));
-plot3(line(1,:),line(2,:),line(3,:),'o');
+plot3(line(1,:),line(2,:),line(3,:),'.');
+
+% To demonstrate that directly using depth information on the edge won't
+% work
+line_pts = edge_pts(inlierIdx, :);
+line_pc = tofpts2pc(D_undistort, C, line_pts);
+pcshow(line_pc, [bitshift(bitand(5,4),-2) bitshift(bitand(5,2),-1) bitand(5,1)]);
 

@@ -10,7 +10,7 @@ for j = 1: w
         if D(i,j) > 1000
             continue;
         end
-        costheta = 1/sqrt( ((i-C(1,3))/C(1,1))^2 + ((j-C(2,3))/C(2,2))^2 + 1);
+        costheta = 1/sqrt( ((j-C(1,3))/C(1,1))^2 + ((i-C(2,3))/C(2,2))^2 + 1);
         z = double(D(i,j))*costheta;
         proj = [j*z; i*z; z];
         pos = C\proj;
@@ -32,5 +32,5 @@ end
 % x = (i-offx)*z/fx;
 % y = (j-offy)*z/fy;
 % d = sqrt(x^2+y^2+z^2);
-% cos(theta) = z/d = 1/sqrt( ((i-offx)/fx)^2 + ((j-offy)/fy)^2 + 1)
+% cos(theta) = z/d = 1/sqrt( ((j-offx)/fx)^2 + ((i-offy)/fy)^2 + 1)
 % z = d*cos(theta)
