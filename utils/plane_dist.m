@@ -1,3 +1,7 @@
+% return the distance between two parallel planes
+% input: 
+% p1, p2 - plane model to the planes ax+by+cz+d=0
+% points1, points2 - points on the planes
 function dist = plane_dist(p1, p2, points1, points2)
 
 n1 = p1(1:3);

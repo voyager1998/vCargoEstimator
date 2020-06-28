@@ -100,7 +100,7 @@ for i=1:numplanes-1
         syms t
         t=-500:500;
         line = I'+t.*(u'/norm(u'));
-        plot3(line(1,:),line(2,:),line(3,:),'o');
+        plot3(line(1,:),line(2,:),line(3,:),'-');
     end
 end
 % hold off;
@@ -114,12 +114,12 @@ end
 % xyz = solve([ekv1, ekv2, ekv3]);
 
 %% calculate height
-figure(image_counter);
-hold on;
-image_counter = image_counter + 1;
-pcshow(plane_points{1});
-pcshow(plane_points{2});
-title('parallel planes for height calculation');
+% figure(image_counter);
+% hold on;
+% image_counter = image_counter + 1;
+% pcshow(plane_points{1});
+% pcshow(plane_points{2});
+% title('parallel planes for height calculation');
 height = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
 % height = 340.7499 / 341.3144
 
@@ -132,6 +132,7 @@ image_counter = image_counter + 1;
 imagesc(edge_D)
 title('Edges in Depth image')
 hold on
+
 %% RANSAC edge function based on Depth image
 [rows,cols] = find(edge_D == true);
 edge_pts = [rows,cols];
@@ -174,4 +175,33 @@ syms t
 t=-500:500;
 line = I'+t.*(u'/norm(u'));
 plot3(line(1,:),line(2,:),line(3,:),'o');
+
+%% calculate width
+% find parallel lines to the edge
+parallel_lines=zeros(1,2);
+m=1;
+v1=edges(k-1,4:6);
+v1=v1./norm(v1);
+for i=1:k-2
+    v2=edges(i,4:6);
+    v2=v2./norm(v2);
+    cos_val=dot(v1,v2);
+    if abs(sin(acos(cos_val)))<0.5
+        parallel_lines(m)=i;
+        m=m+1;
+    end
+end
+
+% calculate distance between the parallel lines
+figure(ransac_figure);
+syms t y1 y2
+y1=I'+t.*(u'/norm(u'));
+i=1;
+I2=edges(i,1:3);
+u2=edges(i,4:6);
+y2=I2'+t.*(u2'/norm(u2'));
+t=-500:500;
+plot3(y2(1,:),y2(2,:),y2(3,:),'o');
+% corner=solve(norm(y1-y2)<100,t);
+% width = line_dist(u1,I1,u2,I2,points1,points2);
 
