@@ -7,7 +7,8 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 addpath(strcat(pwd,'/calibration'));
-D = imread(strcat(pwd, '/data/0605/DepthImage_0.png'));
+% D = imread(strcat(pwd, '/data/0605/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/data0614/DepthImage_0.png'));
 D = D/16;
 load('calibration/fixorigincalibration.mat');
 C = cameraParams.IntrinsicMatrix';
@@ -117,24 +118,26 @@ hold off;
 % xyz = solve([ekv1, ekv2, ekv3]);
 
 %% calculate height
+plane1=parallel_planes(1);
+plane2=parallel_planes(2);
 figure(image_counter);
 hold on;
 image_counter = image_counter + 1;
-pcshow(plane_points{parallel_planes(1)});
-pcshow(plane_points{parallel_planes(2)});
+pcshow(plane_points{plane1});
+pcshow(plane_points{plane2});
 title('parallel planes for height calculation');
-height = plane_dist(plane_models(1,:), plane_models(4,:), plane_points{1}, plane_points{4});
+height = plane_dist(plane_models(plane1,:), plane_models(plane2,:), plane_points{plane1}, plane_points{plane2});
 % height = 340.7499 / 341.3144
 
 %% calculate width and length
-poi = plane_points{2};
-poi = pointCloud(poi);
-figure(image_counter);
-image_counter = image_counter + 1;
-pcshow(poi);
-
-[poi,inlierIndices,outlierIndices] = pcdenoise(poi, 'Threshold', 0.001);
-pt = poi.Location;
+% poi = plane_points{2};
+% poi = pointCloud(poi);
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% pcshow(poi);
+% 
+% [poi,inlierIndices,outlierIndices] = pcdenoise(poi, 'Threshold', 0.001);
+% pt = poi.Location;
 
 %% fit rectangle
 poi = plane_points{2};
