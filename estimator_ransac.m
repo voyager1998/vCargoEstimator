@@ -9,9 +9,11 @@ addpath(strcat(pwd,'/utils'));
 addpath(strcat(pwd,'/calibration'));
 D = imread(strcat(pwd, '/data/data0618_1/DepthImage_2.png'));
 D = D/16;
-load('calibration/ir.mat');
-C = ircameraParams.IntrinsicMatrix';
-D_undistort = undistortImage(D,ircameraParams);
+% load('calibration/ir.mat');
+% C = ircameraParams.IntrinsicMatrix';
+load('calibration/panasonicIRcameraParams.mat')
+C = irCameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,irCameraParams);
 
 figure(image_counter);
 image_counter = image_counter + 1;
@@ -171,7 +173,7 @@ M2=[0,0,-pm(4)./pm(3)];
 edges(k,:)=[I u]; % I point on line, u direction vector of line
 k=k+1;
 syms t
-t=-1500:1000;
+t=-1500:2000;
 line = I'+t.*(u'/norm(u'));
 plot3(line(1,:),line(2,:),line(3,:),'.');
 
