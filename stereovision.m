@@ -4,14 +4,18 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
-RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_7.png'));
+RGB = imread(strcat(pwd, '/data/fix/fix80/RGBImage_1.png'));
+redChannel = RGB(:, :, 1);
+greenChannel = RGB(:, :, 2);
+blueChannel = RGB(:, :, 3);
+redandgreen = RGB(:,:,[1,2]);
 grayfromRGB = rgb2gray(RGB);
 load('calibration/panasonicRGBcameraParams.mat');
 C_rgb = rgbCameraParams.IntrinsicMatrix';
 rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
 rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise
 
-D = imread(strcat(pwd, '/data/data0618_1/DepthImage_7.png'));
+D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
@@ -23,7 +27,8 @@ pc_ir = tof2pc(D_deoise, C_ir);
 
 %% 3d world points in tof's coordinate system -> rgb's coordinate system
 load('calibration/panasonicStereoParams.mat');
-pc_rgb = pc_ir*stereoParams.RotationOfCamera2+stereoParams.TranslationOfCamera2;
+pc_rgb = stereoParams.RotationOfCamera2*pc_ir'+stereoParams.TranslationOfCamera2';
+pc_rgb = pc_rgb';
 figure(image_counter);
 pc_figure = image_counter;
 image_counter = image_counter + 1;
@@ -51,7 +56,7 @@ ransac_figure = image_counter;
 figure(ransac_figure);
 hold on;
 image_counter = image_counter + 1;
-numplanes = 4;
+numplanes = 2;
 plane_models = zeros(numplanes,4);
 plane_points{1,4} = [];
 for i = 1:numplanes
@@ -103,15 +108,15 @@ hold off;
 
 %% find edge from rgb image
 edge_thres = 0.1;
-edge_rgb = edge(rgb_denoise,'Canny', edge_thres);
+edge_rgb = edge(redChannel,'Canny', edge_thres);
 figure(image_counter);
 edge_figure = image_counter;
 image_counter = image_counter + 1;
 imagesc(edge_rgb);
 title('edge detected in rgb image');
 
-%% RANSAC fit edge in rgb image
-numlines = 7;
+% RANSAC fit edge in rgb image
+numlines = 10;
 [rows,cols] = find(edge_rgb == true);
 edge_pts = [rows,cols];
 line_2dmodels=zeros(numlines,2);
