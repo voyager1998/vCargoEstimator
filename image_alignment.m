@@ -19,6 +19,9 @@ image_counter = image_counter + 1;
 imshowpair(D1, D2,'Scaling','joint')
 title('misaligned depth images');
 
+%% Transform point cloud from the perpective of ToF camera to RGB camera
+
+
 %% Align two depth images
 % find transform martix from gray image
 IR1 = imread(strcat(pwd, '/data/data0618_1/GrayImage_5.png'));
