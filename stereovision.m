@@ -5,10 +5,10 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
 RGB = imread(strcat(pwd, '/data/fix/fix80/RGBImage_1.png'));
+% RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_7.png'));
 redChannel = RGB(:, :, 1);
 greenChannel = RGB(:, :, 2);
 blueChannel = RGB(:, :, 3);
-redandgreen = RGB(:,:,[1,2]);
 grayfromRGB = rgb2gray(RGB);
 load('calibration/panasonicRGBcameraParams.mat');
 C_rgb = rgbCameraParams.IntrinsicMatrix';
@@ -16,39 +16,37 @@ rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
 rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise
 
 D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
+% D = imread(strcat(pwd, '/data/data0618_1/DepthImage_7.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 D_undistort = undistortImage(D,irCameraParams);
-D_deoise = imbilatfilt(D_undistort, 1500, 5);
+D_denoise = imbilatfilt(D_undistort, 1500, 5);
+
+IR = imread(strcat(pwd, '/data/fix/fix80/GrayImage_1.png'));
+IR_undistort = undistortImage(IR,irCameraParams);
+IR_denoise = imbilatfilt(IR_undistort, 1500, 5);
 
 % 2d pixel in tof camera's perspective -> 3d world points in tof camera's coordinate system
-pc_ir = tof2pc(D_deoise, C_ir);
+pc_ir = tof2pc(D_denoise, C_ir);
 
 %% 3d world points in tof's coordinate system -> rgb's coordinate system
-load('calibration/panasonicStereoParams.mat');
-pc_rgb = stereoParams.RotationOfCamera2*pc_ir'+stereoParams.TranslationOfCamera2';
-pc_rgb = pc_rgb';
-figure(image_counter);
-pc_figure = image_counter;
-image_counter = image_counter + 1;
-pcshow(pc_ir,[0 0 1]);
-hold on;
-pcshow(pc_rgb,[0 1 0]);
-title("pc from the perspective of both rgb[green] and tof[blue] camera");
-hold off;
+% load('calibration/panasonicStereoParams.mat');
+% pc_rgb = stereoParams.RotationOfCamera2*pc_ir'+stereoParams.TranslationOfCamera2';
+% pc_rgb = pc_rgb';
+% figure(image_counter);
+% pc_figure = image_counter;
+% image_counter = image_counter + 1;
+% pcshow(pc_ir,[0 0 1]);
+% hold on;
+% pcshow(pc_rgb,[0 1 0]);
+% title("pc from the perspective of both rgb[green] and tof[blue] camera");
+% hold off;
 
-% 3d pc -> 2d pixel in rgb camera's perspective
-I = rgbCameraParams.Intrinsics;
-DbyRGB = worldToImage(I,eye(3,3),zeros(3,1),pc_rgb);
-figure(image_counter);
-image_counter = image_counter + 1;
-scatter(DbyRGB(:,1),DbyRGB(:,2),5,'filled');
-title("reproject 2d prom rgb camera's perspective");
+%% RANSAC fit plane from tof's pc
+pc = pc_ir;
 
-%% RANSAC fit plane from rgb's pc
-pc = pc_rgb;
-
+numplanes = 2;
 iterations = 100;
 subset_size = 3;
 
@@ -56,11 +54,10 @@ ransac_figure = image_counter;
 figure(ransac_figure);
 hold on;
 image_counter = image_counter + 1;
-numplanes = 2;
 plane_models = zeros(numplanes,4);
 plane_points{1,4} = [];
 for i = 1:numplanes
-    inlier_thres = 20;
+    inlier_thres = 10;
     if (i == 1) 
         inlier_thres = 30;
     end
@@ -79,54 +76,67 @@ zlabel('Z');
 hold off;
 
 %% find intersection line of every 2 planes
-figure(ransac_figure);
-hold on;
+% figure(ransac_figure);
+% hold on;
+% 
+% line_3dmodels=zeros(numplanes.*(numplanes-1)./2-1,6); % (1:3)=I,point on line % (4:6)=u,direction vector of line
+% k=1;
+% for i=1:numplanes-1
+%     for j=i+1:numplanes
+%         p1=plane_models(i,:);
+%         p2=plane_models(j,:);
+%         n1=p1(1:3);
+%         M1=[0,0,-p1(4)./p1(3)];
+%         n2=p2(1:3);
+%         M2=[0,0,-p2(4)./p2(3)];
+%         if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5
+%             continue
+%         end
+%         [I, u, rc] = planes_intersection(n1, M1, n2, M2, 1);
+%         line_3dmodels(k,:)=[I u]; % I point on line, u direction vector of line
+%         k=k+1;
+%         syms t
+%         t=-500:500;
+%         line = I'+t.*(u'/norm(u'));
+%         plot3(line(1,:),line(2,:),line(3,:),'.','Color','y');
+%     end
+% end
+% hold off;
 
-line_3dmodels=zeros(numplanes.*(numplanes-1)./2-1,6); % (1:3)=I,point on line % (4:6)=u,direction vector of line
-k=1;
-for i=1:numplanes-1
-    for j=i+1:numplanes
-        p1=plane_models(i,:);
-        p2=plane_models(j,:);
-        n1=p1(1:3);
-        M1=[0,0,-p1(4)./p1(3)];
-        n2=p2(1:3);
-        M2=[0,0,-p2(4)./p2(3)];
-        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5
-            continue
-        end
-        [I, u, rc] = planes_intersection(n1, M1, n2, M2, 1);
-        line_3dmodels(k,:)=[I u]; % I point on line, u direction vector of line
-        k=k+1;
-        syms t
-        t=-500:500;
-        line = I'+t.*(u'/norm(u'));
-        plot3(line(1,:),line(2,:),line(3,:),'.','Color','y');
-    end
-end
-hold off;
+%% find edge from depth image
+edge_thres = 0.05;
+edge_depth = edge(D_denoise,'Canny', edge_thres);
 
-%% find edge from rgb image
-edge_thres = 0.1;
-edge_rgb = edge(redChannel,'Canny', edge_thres);
+% Project points of the top plane from 3d pc of RGB to 2d
+% I = rgbCameraParams.Intrinsics;
+I = irCameraParams.Intrinsics;
 figure(image_counter);
 edge_figure = image_counter;
 image_counter = image_counter + 1;
-imagesc(edge_rgb);
-title('edge detected in rgb image');
+imshow(edge_depth)
+hold on
+for i=1:1:numplanes
+    DbyRGB = worldToImage(I,eye(3,3),zeros(3,1),plane_points{i});
+    plot(DbyRGB(:,1), DbyRGB(:,2), '.', 'LineWidth', 1, 'MarkerSize', 1);
+end
+title("edges and planes of depth");
+hold off
 
-% RANSAC fit edge in rgb image
-numlines = 10;
-[rows,cols] = find(edge_rgb == true);
-edge_pts = [rows,cols];
+%% RANSAC fit edge in depth image
+numlines = 4;
+edge_image = edge_depth;
+
+[rows,cols] = find(edge_image == true);
+ROI=(rows>100);
+edge_pts = [rows(ROI),cols(ROI)];
 line_2dmodels=zeros(numlines,2);
 k=1;
 % line_points{1,numlines}=[];
 figure(edge_figure);
-hold on;
+hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 2; % max allowable distance for inliers
+    maxDistance = 200; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -143,7 +153,7 @@ for i=1:numlines
 end
 xlim([0 640]);
 ylim([0 480]);
-legend({'1','2','3','4','5','6','7'},'Location','southwest');
+legend({},'Location','southwest');
 hold off;
 
 %% From edge to plane; Compute plane intersection
@@ -157,7 +167,7 @@ n1=p1(1:3);
 M1=[0,0,-p1(4)./p1(3)];
 
 for i=1:numlines % assume 2 lines are of interest
-    pm = line2dTplane(line_2dmodels(i,:), C_rgb);
+    pm = line2dTplane(line_2dmodels(i,:), C_ir);
     n2=pm(1:3);
     M2=[0,0,-pm(4)./pm(3)];
     
@@ -168,7 +178,7 @@ for i=1:numlines % assume 2 lines are of interest
     line = I'+t.*(u'/norm(u'));
     plot3(line(1,:),line(2,:),line(3,:),'.','Color','magenta');
 end
-
+hold off;
 % plot the camera's view plane through the above edge
 % syms X Y Z1
 % scale1=1./pm(3); % scale factor before z to 1
@@ -178,12 +188,14 @@ end
 % Z1=-pm(1).*X-pm(2).*Y-pm(4);
 % surf(X,Y,Z1);
 
-%% Calculate length and length
+%% Calculate height/length/width
+height = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+
 corners=zeros(numlines.*(numlines-1),3);
 c=1;
 
 figure(ransac_figure);
-hold on;
+hold on
 for i=1:numlines-1
     for j=i+1:numlines
         syms k1 k2
@@ -219,66 +231,6 @@ for i=1:c-1
         k=k+1;
     end
 end
-% blue grenn cyan red magenta yellow
-% length=(466.0544+445.7806)/2=455.9175
-% width=(278.3207+283.8947)/2=281.1077
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Rectify based on uncalibrated stereo cameras
-
-% blobs1 = detectSURFFeatures(grayfromRGB, 'MetricThreshold', 2000);
-% blobs2 = detectSURFFeatures(IR, 'MetricThreshold', 2000);
-% figure;
-% imshow(grayfromRGB);
-% hold on;
-% plot(selectStrongest(blobs1, 30));
-% title('Thirty strongest SURF features in I1');
-% 
-% figure;
-% imshow(IR);
-% hold on;
-% plot(selectStrongest(blobs2, 30));
-% title('Thirty strongest SURF features in I2');
-
-%% Rectify based on calibration
-% load('calibration/panasonicStereoParams.mat');
-% [RGBRect, IRRect] = rectifyStereoImages(grayfromRGB, IR, stereoParams, 'OutputView','full');
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% imagesc(RGBRect)
-% set(gca,'dataAspectRatio',[1 1 1])
-% title('grayfromRGB Rectified')
-% 
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% imagesc(IRRect)
-% set(gca,'dataAspectRatio',[1 1 1])
-% title('IR Rectified')
-% 
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% imagesc(stereoAnaglyph(RGBRect, IRRect));
-% set(gca,'dataAspectRatio',[1 1 1])
-% title('Rectified Frames');
-
-%% Compute Disparity
-% disparityMap = disparitySGM(RGBRect, IRRect);
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% imagesc(disparityMap, [0, 64]);
-% title('Disparity Map');
-% colormap jet
-% colorbar
-
-%% Reconstruct the 3-D Scene
-% points3D = reconstructScene(disparityMap, stereoParams);
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% pcshow(points3D)
-% title('Pointcloud')
-% xlabel('X')
-% ylabel('Y')
-% zlabel('Z')
-
-
+% point order: blue grenn cyan red magenta yellow
+% length=(301+315)/2=308
+% width=(294+295)/2=294
