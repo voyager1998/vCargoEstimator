@@ -4,7 +4,8 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
-RGB = imread(strcat(pwd, '/data/fix/fix80/RGBImage_1.png'));
+RGB = imread(strcat(pwd, '/data/steadyBoxB/RGBImage_1.png'));
+% RGB = imread(strcat(pwd, '/data/fix/fix80/RGBImage_1.png'));
 % RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_7.png'));
 redChannel = RGB(:, :, 1);
 greenChannel = RGB(:, :, 2);
@@ -15,7 +16,8 @@ C_rgb = rgbCameraParams.IntrinsicMatrix';
 rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
 rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise
 
-D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
+D = imread(strcat(pwd, '/data/steadyBoxB/DepthImage_1.png'));
+% D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
 % D = imread(strcat(pwd, '/data/data0618_1/DepthImage_7.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
@@ -23,9 +25,9 @@ C_ir = irCameraParams.IntrinsicMatrix';
 D_undistort = undistortImage(D,irCameraParams);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
-IR = imread(strcat(pwd, '/data/fix/fix80/GrayImage_1.png'));
-IR_undistort = undistortImage(IR,irCameraParams);
-IR_denoise = imbilatfilt(IR_undistort, 1500, 5);
+% IR = imread(strcat(pwd, '/data/fix/fix80/GrayImage_1.png'));
+% IR_undistort = undistortImage(IR,irCameraParams);
+% IR_denoise = imbilatfilt(IR_undistort, 1500, 5);
 
 % 2d pixel in tof camera's perspective -> 3d world points in tof camera's coordinate system
 pc_ir = tof2pc(D_denoise, C_ir);
@@ -44,6 +46,8 @@ pc_ir = tof2pc(D_denoise, C_ir);
 % hold off;
 
 %% RANSAC fit plane from tof's pc
+p=load('bias.mat').p; % bias transformation calculated from bias_cancellation.m 
+pc_ir(:,3)=polyval(p,pc_ir(:,3));
 pc = pc_ir;
 
 numplanes = 2;
@@ -117,6 +121,10 @@ imshow(edge_depth)
 hold on
 for i=1:1:numplanes
     DbyRGB = worldToImage(I,eye(3,3),zeros(3,1),plane_points{i});
+%     x=DbyRGB(:,1);
+%     y=DbyRGB(:,2);
+%     k=boundary(x,y,1);
+%     plot(x(k),y(k));
     plot(DbyRGB(:,1), DbyRGB(:,2), '.', 'LineWidth', 1, 'MarkerSize', 1);
 end
 title("edges and planes of depth");

@@ -6,7 +6,7 @@ addpath(strcat(pwd,'/utils'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
-groundtruth=[50,55,60,70,75,80,85,90,95,100,105];
+groundtruth=[50,55,65,70,75,80,85,90,95,100,105];
 dist=zeros(size(groundtruth,2),4); % there are 4 depth images in each distances' file
 for num=1:size(groundtruth,2)
     figure(num);
@@ -22,7 +22,27 @@ for num=1:size(groundtruth,2)
     title(['fitted plane' num2str(groundtruth(num),'%d')]);
     hold off;
 end
-distances=[groundtruth'*10 dist];
+distances=[groundtruth'*10 groundtruth'*10-mean(dist,2) mean(dist,2) dist];
+% fit and plot
+x=distances(:,3); % practical
+y=distances(:,1); % theoretical
+image_counter=image_counter+num;
+figure(image_counter);
+image_counter=image_counter+1;
+scatter(x,y,'filled')
+hold on
+p = polyfit(x,y,1);
+x1=linspace(450, 1100);
+y1=polyval(p,x1);
+plot(x1,y1,'LineWidth',2)
+xlabel('practical distance')
+ylabel('theoretical distance')
+legend('calculated point', 'fitted line')
+title('relation between practical and theoretical distance from camera to plane');
+% save('bias.mat','p','distances');
+
+%% apply fitted relation
+% stereovision.m
 
 %% function to calculate distance from plane to camera
 function dist = plane_camera_dist(pc, idx)
