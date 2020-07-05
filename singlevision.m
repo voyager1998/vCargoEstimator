@@ -80,8 +80,8 @@ for i = 1:size(upper_pos, 1)
     upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
 end
 
+% plot, could comment out
 figure(image_counter);
-edge_figure = image_counter;
 image_counter = image_counter + 1;
 imshow(upper_2D);
 set(gca,'dataAspectRatio',[1 1 1])
@@ -90,15 +90,21 @@ title('Upper plane')
 edge_thres = 0.05;
 upper_edge = edge(upper_2D, 'Canny', edge_thres);
 
+% edge_figure, should have
 figure(image_counter);
+edge_figure = image_counter;
 image_counter = image_counter + 1;
 imshow(upper_edge);
 set(gca,'dataAspectRatio',[1 1 1])
 title('Upper plane - edge')
 
+% ------------------------------------------------------------
+% D_upperEdge, pc_upperEdge_ir are not used at this time
+% ------------------------------------------------------------
 D_upperEdge = D_denoise .* uint16(upper_edge);
 D_upperEdge(D_upperEdge == 0) = 2^12;
 
+% plot, could comment out
 figure(image_counter);
 image_counter = image_counter + 1;
 imagesc(D_upperEdge);
@@ -106,19 +112,16 @@ set(gca,'dataAspectRatio',[1 1 1])
 title('Upper plane - depth')
 
 pc_upperEdge_ir = tof2pc(D_upperEdge, C_ir);
-figure(image_counter);figure(image_counter);
-image_counter = image_counter + 1;
-pcshow(pc)
-title('Pointcloud')
-xlabel('X')
-ylabel('Y')
-zlabel('Z')
+
+% plot, could comment out
+figure(image_counter);
 image_counter = image_counter + 1;
 pcshow(pc_upperEdge_ir)
 title('Pointcloud - Upper Edge')
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
+% -------------------------------------------------------
 
 % use ransac to fit lines
 numlines = 4;
@@ -152,29 +155,27 @@ end
 xlim([0 640]);
 ylim([0 480]);
 legend({},'Location','southwest');
-hold on;
+hold off;
 
-%% detect corner and plotting
+%% Method1: detect corner in depth image (2D)
 corner_2D = zeros(numlines,2);
 corner_count = 0;
 for i=1:(numlines-1)
     for j = (i+1):numlines
-        a1 = line_2dmodels(i,1); b1 = line_2dmodels(i,2) % y = ax+b
-        a2 = line_2dmodels(j,1); b2 = line_2dmodels(j,2)
+        a1 = line_2dmodels(i,1); b1 = line_2dmodels(i,2); % y = ax+b
+        a2 = line_2dmodels(j,1); b2 = line_2dmodels(j,2);
         
         x = (b2 - b1)/(a1 - a2); % solve a1*x + b1 = a2*x + b2
         y = a1 * x + b1;
         
-        if (x>0) && (x<640) && (y>0) && (y<480)
+        if (x>0) && (x<640) && (y>0) && (y<480) 
             corner_count = corner_count + 1;
             corner_2D(corner_count, :) = [x y];
         end            
     end
 end
 
-plot(corner_2D(:,1), corner_2D(:,2), 'o')
-
-hold off
+% plot(corner_2D(:,1), corner_2D(:,2), 'o');
 
 corner_2D = round(corner_2D);
 D_corner2D = [corner_2D, zeros(size(corner_2D, 1), 1)];
@@ -185,19 +186,74 @@ for i = 1:size(corner_2D, 1)
 end
 
 pc_corner = pixel2pc(D_corner2D, C_ir);
-figure(ransac_figure);
-hold on
+pc_corner_proj = proj2plane(pc_corner, plane_models(2,:)); % here, upper plane is 2, need to revise
 
+figure(image_counter);
+image_counter = image_counter + 1;
+pcshow(plane_points{1}, [bitshift(bitand(1,4),-2) bitshift(bitand(1,2),-1) bitand(1,1)]);
+hold on;
+pcshow(plane_points{2}, [bitshift(bitand(2,4),-2) bitshift(bitand(2,2),-1) bitand(2,1)]);
+title('Pointcloud - Upper Plane vs. Corner (2D Method)')
+xlabel('X')
+ylabel('Y')
+zlabel('Z')
 
-%plot3(pc_corner(:,1), pc_corner(:,2), pc_corner(:,3) , 'MarkerSize',40,'Color',[bitshift(bitand(5,4),-2) bitshift(bitand(5,2),-1) bitand(5,1)]);
-
-pcshow(pc_corner, [bitshift(bitand(5,4),-2) bitshift(bitand(5,2),-1) bitand(5,1)], 'MarkerSize',40);
+pcshow(pc_corner, [bitshift(bitand(5,4),-2) bitshift(bitand(5,2),-1) bitand(5,1)], 'MarkerSize',400);
+pcshow(pc_corner_proj, [bitshift(bitand(6,4),-2) bitshift(bitand(6,2),-1) bitand(6,1)], 'MarkerSize',400);
+hold off;
 
 d = []; 
 
 for i=1:3
     for j=(i+1):4
-        dist = sqrt(sum(abs(pc_corner(i,:) - pc_corner(j,:)).^2));
+        dist = sqrt(sum(abs(pc_corner_proj(i,:) - pc_corner_proj(j,:)).^2));
+        d = [d dist];
+    end
+end
+    
+d % the distance is wrong because not in the same plane
+
+%% Method2: detect corner in point cloud (3D)
+
+p1=plane_models(2,:); % top plane
+pm_lines = zeros(numlines, 4); % plane model of lines
+
+for i=1:numlines % assume 2 lines are of interest
+    pm_lines(i,:) = ( line2dTplane(line_2dmodels(i,:), C_ir) )';
+end
+
+corner_3D = zeros(numlines,3);
+corner_count = 0;
+for i=1:(numlines-1)
+    for j = (i+1):numlines   
+        % p1 is the top plane
+        u1 = pm_lines(i,1:3)/ norm(pm_lines(i,1:3));
+        u2 = pm_lines(j,1:3)/ norm(pm_lines(j,1:3));        
+        if (abs(dot(u1,u2))<0.5) && corner_count <= numlines
+            corner_count = corner_count + 1;            
+            corner_3D(corner_count, :) = findIntersection(p1, pm_lines(i,:), pm_lines(j,:));
+        end            
+    end
+end
+
+figure(image_counter);
+image_counter = image_counter + 1;
+pcshow(plane_points{1}, [bitshift(bitand(1,4),-2) bitshift(bitand(1,2),-1) bitand(1,1)]);
+hold on;
+pcshow(plane_points{2}, [bitshift(bitand(2,4),-2) bitshift(bitand(2,2),-1) bitand(2,1)]);
+title('Pointcloud - Upper Plane vs. Corner (3D method)')
+xlabel('X')
+ylabel('Y')
+zlabel('Z')
+
+pcshow(corner_3D, [bitshift(bitand(4,4),-2) bitshift(bitand(4,2),-1) bitand(4,1)], 'MarkerSize',400);
+hold off;
+
+d = []; 
+
+for i=1:3
+    for j=(i+1):4
+        dist = sqrt(sum(abs(corner_3D(i,:) - corner_3D(j,:)).^2));
         d = [d dist];
     end
 end
