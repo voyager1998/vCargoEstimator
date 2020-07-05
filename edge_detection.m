@@ -4,6 +4,7 @@ close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
+edge_thres = 0.1;
 
 %% Load RGB image; Compute edges
 % RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_2.png'));
@@ -18,7 +19,7 @@ addpath(strcat(pwd,'/utils'));
 % 
 % figure(image_counter);
 % image_counter = image_counter + 1;
-% imagesc(edge_gray)
+% imshow(edge_gray)
 % title('Edges in gray image')
 
 %% Load IR image; Compute edges
@@ -31,7 +32,7 @@ addpath(strcat(pwd,'/utils'));
 % 
 % figure(image_counter);
 % image_counter = image_counter + 1;
-% imagesc(edge_ir)
+% imshow(edge_ir)
 % title('Edges in IR image')
 
 %% Load Depth image; Compute edges
@@ -45,7 +46,7 @@ edge_D = edge(D_undistort,'Canny', edge_thres);
 
 figure(image_counter);
 image_counter = image_counter + 1;
-imagesc(edge_D)
+imshow(edge_D)
 title('Edges in Depth image')
 hold on
 %% RANSAC edge function based on Depth image
