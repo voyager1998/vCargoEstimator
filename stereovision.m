@@ -79,7 +79,8 @@ hold off;
 % figure(ransac_figure);
 % hold on;
 % 
-% line_3dmodels=zeros(numplanes.*(numplanes-1)./2-1,6); % (1:3)=I,point on line % (4:6)=u,direction vector of line
+% line_3dmodels=zeros(numplanes.*(numplanes-1)./2-1,6); % (1:3)=I,point on line 
+% (4:6)=u,direction vector of line
 % k=1;
 % for i=1:numplanes-1
 %     for j=i+1:numplanes
@@ -109,7 +110,8 @@ edge_depth = edge(D_denoise,'Canny', edge_thres);
 
 % Project points of the top plane from 3d pc of RGB to 2d
 % I = rgbCameraParams.Intrinsics;
-I = irCameraParams.Intrinsics;
+% I = irCameraParams.Intrinsics;
+I = irCameraParams;
 figure(image_counter);
 edge_figure = image_counter;
 image_counter = image_counter + 1;
@@ -215,7 +217,8 @@ for i=1:numlines-1
             corners(c,:)=intercept1';
             % intercept2=p2+k2*u2;
             % intercept2=double(intercept2);
-            plot3(intercept1(1),intercept1(2),intercept1(3),'.','MarkerSize',40,'Color',[bitshift(bitand(c,4),-2) bitshift(bitand(c,2),-1) bitand(c,1)]);
+            plot3(intercept1(1),intercept1(2),intercept1(3),'.','MarkerSize',40,'Color',...
+                [bitshift(bitand(c,4),-2) bitshift(bitand(c,2),-1) bitand(c,1)]);
             c=c+1;
         end
     end
