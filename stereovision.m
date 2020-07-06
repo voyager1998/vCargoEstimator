@@ -5,7 +5,6 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
 RGB = imread(strcat(pwd, '/data/fix/fix80/RGBImage_1.png'));
-% RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_7.png'));
 redChannel = RGB(:, :, 1);
 greenChannel = RGB(:, :, 2);
 blueChannel = RGB(:, :, 3);
@@ -16,7 +15,6 @@ rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
 rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise
 
 D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
-% D = imread(strcat(pwd, '/data/data0618_1/DepthImage_7.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
@@ -29,19 +27,6 @@ IR_denoise = imbilatfilt(IR_undistort, 1500, 5);
 
 % 2d pixel in tof camera's perspective -> 3d world points in tof camera's coordinate system
 pc_ir = tof2pc(D_denoise, C_ir);
-
-%% 3d world points in tof's coordinate system -> rgb's coordinate system
-% load('calibration/panasonicStereoParams.mat');
-% pc_rgb = stereoParams.RotationOfCamera2*pc_ir'+stereoParams.TranslationOfCamera2';
-% pc_rgb = pc_rgb';
-% figure(image_counter);
-% pc_figure = image_counter;
-% image_counter = image_counter + 1;
-% pcshow(pc_ir,[0 0 1]);
-% hold on;
-% pcshow(pc_rgb,[0 1 0]);
-% title("pc from the perspective of both rgb[green] and tof[blue] camera");
-% hold off;
 
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
@@ -75,11 +60,33 @@ ylabel('Y');
 zlabel('Z');
 hold off;
 
+%% 3d world points in tof's coordinate system -> rgb's coordinate system
+load('calibration/panasonicStereoParams.mat');
+% pc_rgb = stereoParams.RotationOfCamera2*pc_ir'+stereoParams.TranslationOfCamera2';
+% pc_rgb = pc_rgb';
+% figure(image_counter);
+% pc_figure = image_counter;
+% image_counter = image_counter + 1;
+% pcshow(pc_ir,[0 0 1]);
+% hold on;
+% pcshow(pc_rgb,[0 1 0]);
+% title("pc from the perspective of both rgb[green] and tof[blue] camera");
+% hold off;
+
+% 3d pc -> 2d pixel in rgb camera's perspective
+DbyRGB = worldToImage(rgbCameraParams, stereoParams.RotationOfCamera2, ...
+    stereoParams.TranslationOfCamera2,plane_points{2});
+figure(image_counter);
+image_counter = image_counter + 1;
+scatter(DbyRGB(:,1),DbyRGB(:,2),5,'filled');
+title("reproject 2d prom rgb camera's perspective");
+
 %% find intersection line of every 2 planes
 % figure(ransac_figure);
 % hold on;
 % 
-% line_3dmodels=zeros(numplanes.*(numplanes-1)./2-1,6); % (1:3)=I,point on line % (4:6)=u,direction vector of line
+% line_3dmodels=zeros(numplanes.*(numplanes-1)./2-1,6); % (1:3)=I,point on line 
+% (4:6)=u,direction vector of line
 % k=1;
 % for i=1:numplanes-1
 %     for j=i+1:numplanes
@@ -215,7 +222,8 @@ for i=1:numlines-1
             corners(c,:)=intercept1';
             % intercept2=p2+k2*u2;
             % intercept2=double(intercept2);
-            plot3(intercept1(1),intercept1(2),intercept1(3),'.','MarkerSize',40,'Color',[bitshift(bitand(c,4),-2) bitshift(bitand(c,2),-1) bitand(c,1)]);
+            plot3(intercept1(1),intercept1(2),intercept1(3),'.','MarkerSize',40,...
+                'Color',[bitshift(bitand(c,4),-2) bitshift(bitand(c,2),-1) bitand(c,1)]);
             c=c+1;
         end
     end
