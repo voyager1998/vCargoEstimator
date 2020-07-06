@@ -7,9 +7,9 @@ addpath(strcat(pwd,'/utils'));
 % D must be a top view
 D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
 D = D/16;
-load('calibration/panasonicIRcameraParams.mat');
-C_ir = irCameraParams.IntrinsicMatrix';
-D_undistort = undistortImage(D,irCameraParams);
+load('calibration/ir.mat');
+C_ir = ircameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,ircameraParams);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
 pc_ir = tof2pc(D_denoise, C_ir);
@@ -55,7 +55,7 @@ edge_thres = 0.05;
 edge_depth = edge(D_denoise,'Canny', edge_thres);
 
 % Project points of the fitted plane from 3d pc to 2d
-I = irCameraParams.Intrinsics;
+I = ircameraParams.Intrinsics;
 edge_figure = image_counter;
 image_counter = image_counter + 1;
 figure(edge_figure);
