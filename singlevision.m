@@ -18,9 +18,15 @@ rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise for the Grayscale Im
 D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
 % D = imread(strcat(pwd, '/data/data0618_1/DepthImage_7.png'));
 D = D/16;
-load('calibration/panasonicIRcameraParams.mat');
-C_ir = irCameraParams.IntrinsicMatrix';
-D_undistort = undistortImage(D,irCameraParams);
+
+ load('calibration/panasonicIRcameraParams.mat');
+% C_ir = irCameraParams.IntrinsicMatrix';
+% D_undistort = undistortImage(D,irCameraParams);
+
+
+load('calibration/fixorigincalibration.mat');
+C_ir = cameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,cameraParams);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
 
@@ -69,7 +75,7 @@ ylabel('Y');
 zlabel('Z');
 hold off;
 
-%% Turn the upper plane back to 2D -> then use 2D edge detection
+%% Turn the upper plane back to 2D -> then process the 2D image (before performing edge detection)
 I = irCameraParams;
 
 upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
@@ -80,15 +86,25 @@ for i = 1:size(upper_pos, 1)
     upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
 end
 
-% plot, could comment out
+upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
+
+upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
+upper_2D_post = bwareaopen(upper_2D_post, 2000); % reject small objects
+
 figure(image_counter);
 image_counter = image_counter + 1;
-imshow(upper_2D);
-set(gca,'dataAspectRatio',[1 1 1])
-title('Upper plane')
+imshowpair(upper_2D,upper_2D_post,'montage');
+title('2D Upper plane: before and after processing')
+
+% plot, could comment out
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% imshow(upper_2D);
+% set(gca,'dataAspectRatio',[1 1 1])
+% title('Upper plane')
 
 edge_thres = 0.05;
-upper_edge = edge(upper_2D, 'Canny', edge_thres);
+upper_edge = edge(upper_2D_post, 'Canny', edge_thres);
 
 % edge_figure, should have
 figure(image_counter);
@@ -105,25 +121,25 @@ D_upperEdge = D_denoise .* uint16(upper_edge);
 D_upperEdge(D_upperEdge == 0) = 2^12;
 
 % plot, could comment out
-figure(image_counter);
-image_counter = image_counter + 1;
-imagesc(D_upperEdge);
-set(gca,'dataAspectRatio',[1 1 1])
-title('Upper plane - depth')
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% imagesc(D_upperEdge);
+% set(gca,'dataAspectRatio',[1 1 1])
+% title('Upper plane - depth')
 
-pc_upperEdge_ir = tof2pc(D_upperEdge, C_ir);
+pc_upperEdge_ir = tof2pc(D_upperEdge, C_ir); 
 
 % plot, could comment out
-figure(image_counter);
-image_counter = image_counter + 1;
-pcshow(pc_upperEdge_ir)
-title('Pointcloud - Upper Edge')
-xlabel('X')
-ylabel('Y')
-zlabel('Z')
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% pcshow(pc_upperEdge_ir)
+% title('Pointcloud - Upper Edge')
+% xlabel('X')
+% ylabel('Y')
+% zlabel('Z')
 % -------------------------------------------------------
 
-% use ransac to fit lines
+%% use 2D edge detection -> then use ransac to fit lines
 numlines = 4;
 edge_image = upper_edge; 
 
