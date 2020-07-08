@@ -61,34 +61,32 @@ image_counter = image_counter + 1;
 figure(edge_figure);
 imshow(edge_depth)
 hold on
-for i=1:1:numplanes
-    DbyRGB = worldToImage(I,eye(3,3),zeros(3,1),plane_points{i});
-    plot(DbyRGB(:,1), DbyRGB(:,2), '.', 'LineWidth', 1, 'MarkerSize', 1);
-end
+% for i=1:1:numplanes
+%     DbyRGB = worldToImage(I,eye(3,3),zeros(3,1),plane_points{i});
+%     plot(DbyRGB(:,1), DbyRGB(:,2), '.', 'LineWidth', 1, 'MarkerSize', 1);
+% end
 title("edges and planes of depth");
 hold off;
 
-%% Turn the upper plane back to 2D -> then use 2D edge detection
-% I = irCameraParams;
-% 
-% upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
-% upper_pos = round(upper_pos);
-% 
-% upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
-% for i = 1:size(upper_pos, 1)
-%     upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
-% end
-% 
-% % plot, could comment out
-% edge_figure = image_counter;
-% image_counter = image_counter + 1;
-% figure(edge_figure);
-% imshow(upper_2D);
-% set(gca,'dataAspectRatio',[1 1 1])
-% title('Upper plane')
-% 
-% edge_thres = 0.05;
-% upper_edge = edge(upper_2D, 'Canny', edge_thres);
+% find region of interest
+upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+upper_pos = round(upper_pos);
+upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
+for i = 1:size(upper_pos, 1)
+    upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
+end
+upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
+upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
+upper_2D_post = bwareaopen(upper_2D_post, 4000); % reject small objects
+figure(image_counter);
+image_counter = image_counter + 1;
+imshowpair(upper_2D,upper_2D_post,'montage');
+title('2D Upper plane: before and after processing');
+
+[rows,cols]=find(upper_2D_post==true);
+pts=[rows,cols];
+pt1=min(pts(:,1));
+
 
 %% RANSAC fit edge in depth image
 numlines = 4; % 4 edges of a rectangle
@@ -189,35 +187,3 @@ for i=1:c-1
     end
 end
 % point order: blue grenn cyan red magenta yellow
-
-
-
-
-%% calculate every image
-clear;close all;
-image_counter = 1;
-addpath(pwd);
-addpath(strcat(pwd,'/utils'));
-load('calibration/panasonicIRcameraParams.mat');
-C_ir = irCameraParams.IntrinsicMatrix';
-
-numpics=1;
-groundtruth=[70 80 90 100 110];
-results{5}=zeros(numpics,7);
-bias=load('bias.mat').p;
-for num=1:size(groundtruth,2)
-    for idx=1:numpics
-        filename=['/data/fix/fix' num2str(groundtruth(num),'%d') '/DepthImage_' num2str(idx-1,'%d'), '.png'];
-        D = imread(strcat(pwd, filename));
-        D = D/16;
-        D_undistort = undistortImage(D,irCameraParams);
-        figure(image_counter);
-        image_counter=image_counter+1;
-        hold on
-        results{num}(idx,:)=dimension_calculation(D_undistort,C_ir,bias);
-        xlim([0 640])
-        ylim([0 480])
-        title(['fix' num2str(groundtruth(num))]);
-        hold off;
-    end
-end
