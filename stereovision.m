@@ -121,14 +121,19 @@ imshow(edge_depth)
 hold on
 for i=1:1:numplanes
     DbyRGB = worldToImage(I,eye(3,3),zeros(3,1),plane_points{i});
-%     x=DbyRGB(:,1);
-%     y=DbyRGB(:,2);
-%     k=boundary(x,y,1);
-%     plot(x(k),y(k));
     plot(DbyRGB(:,1), DbyRGB(:,2), '.', 'LineWidth', 1, 'MarkerSize', 1);
 end
 title("edges and planes of depth");
 hold off
+
+%% Region of interest
+DbyRGB=round(DbyRGB);
+ROI = zeros(size(D)); % take the 3D points of upper plane to 2D
+for i = 1:size(DbyRGB, 1)
+    ROI(DbyRGB(i,2), DbyRGB(i,1)) = 1;
+end
+
+
 
 %% RANSAC fit edge in depth image
 numlines = 4;

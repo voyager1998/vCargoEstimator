@@ -5,18 +5,18 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
+D = imread(strcat(pwd, '/data/fix/fix100/DepthImage_2.png'));
 D = D/16;
-load('calibration/ir.mat');
-C_ir = ircameraParams.IntrinsicMatrix';
-D_undistort = undistortImage(D,ircameraParams);
+load('calibration/panasonicIRcameraParams.mat');
+C_ir = irCameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,irCameraParams);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
 pc_ir = tof2pc(D_denoise, C_ir);
 
 %% eliminate bias
-% p=load('bias.mat').p; % bias transformation calculated from bias_cancellation.m 
-% pc_ir(:,3)=polyval(p,pc_ir(:,3));
+p=load('bias.mat').p; % bias transformation calculated from bias_cancellation.m 
+pc_ir(:,3)=polyval(p,pc_ir(:,3));
 
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
@@ -51,11 +51,11 @@ zlabel('Z');
 hold off;
 
 %% find edge from depth image
-edge_thres = 0.05;
+edge_thres = 0.03;
 edge_depth = edge(D_denoise,'Canny', edge_thres);
 
 % Project points of the fitted plane from 3d pc to 2d
-I = ircameraParams.Intrinsics;
+I = irCameraParams.Intrinsics;
 edge_figure = image_counter;
 image_counter = image_counter + 1;
 figure(edge_figure);
@@ -67,6 +67,28 @@ for i=1:1:numplanes
 end
 title("edges and planes of depth");
 hold off;
+
+%% Turn the upper plane back to 2D -> then use 2D edge detection
+% I = irCameraParams;
+% 
+% upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+% upper_pos = round(upper_pos);
+% 
+% upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
+% for i = 1:size(upper_pos, 1)
+%     upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
+% end
+% 
+% % plot, could comment out
+% edge_figure = image_counter;
+% image_counter = image_counter + 1;
+% figure(edge_figure);
+% imshow(upper_2D);
+% set(gca,'dataAspectRatio',[1 1 1])
+% title('Upper plane')
+% 
+% edge_thres = 0.05;
+% upper_edge = edge(upper_2D, 'Canny', edge_thres);
 
 %% RANSAC fit edge in depth image
 numlines = 4; % 4 edges of a rectangle
@@ -158,7 +180,7 @@ end
 hold off;
 
 c=c-1;
-distances=zeros(c*(c-1),1);
+distances=zeros(6,1);
 k=1;
 for i=1:c-1
     for j=i+1:c
@@ -167,5 +189,35 @@ for i=1:c-1
     end
 end
 % point order: blue grenn cyan red magenta yellow
-% length=(301+315)/2=308
-% width=(294+295)/2=294
+
+
+
+
+%% calculate every image
+clear;close all;
+image_counter = 1;
+addpath(pwd);
+addpath(strcat(pwd,'/utils'));
+load('calibration/panasonicIRcameraParams.mat');
+C_ir = irCameraParams.IntrinsicMatrix';
+
+numpics=1;
+groundtruth=[70 80 90 100 110];
+results{5}=zeros(numpics,7);
+bias=load('bias.mat').p;
+for num=1:size(groundtruth,2)
+    for idx=1:numpics
+        filename=['/data/fix/fix' num2str(groundtruth(num),'%d') '/DepthImage_' num2str(idx-1,'%d'), '.png'];
+        D = imread(strcat(pwd, filename));
+        D = D/16;
+        D_undistort = undistortImage(D,irCameraParams);
+        figure(image_counter);
+        image_counter=image_counter+1;
+        hold on
+        results{num}(idx,:)=dimension_calculation(D_undistort,C_ir,bias);
+        xlim([0 640])
+        ylim([0 480])
+        title(['fix' num2str(groundtruth(num))]);
+        hold off;
+    end
+end

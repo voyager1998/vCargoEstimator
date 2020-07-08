@@ -3,11 +3,12 @@ clear; close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
-load('calibration/ir.mat');
-C_ir = ircameraParams.IntrinsicMatrix';
+load('calibration/panasonicIRcameraParams.mat');
+C_ir = irCameraParams.IntrinsicMatrix';
 
 groundtruth=[50,55,65,70,75,80,85,90,95,100,105];
-dist=zeros(size(groundtruth,2),4); % there are 4 depth images in each distances' file
+numpics=1; % there are 4 depth images can be used in each distances' file
+dist=zeros(size(groundtruth,2),numpics);
 for num=1:size(groundtruth,2)
     figure(num);
     hold on
@@ -16,11 +17,11 @@ for num=1:size(groundtruth,2)
     Z= groundtruth(num)*10+0*X;
     surf(X,Y,Z)
     hold on
-    for idx=1:4
+    for idx=1:numpics
         filename=['/data/plane2/plane' num2str(groundtruth(num),'%d') '/DepthImage_' num2str(idx-1,'%d'), '.png'];
         D = imread(strcat(pwd, filename));
         D = D/16;
-        D_undistort = undistortImage(D,ircameraParams);
+        D_undistort = undistortImage(D,irCameraParams);
         pc=tof2pc(D_undistort, C_ir);
         dist(num,idx)=plane_camera_dist(pc, idx);
     end
@@ -30,7 +31,8 @@ end
 distances=[groundtruth'*10 groundtruth'*10-mean(dist,2) mean(dist,2) dist];
 % fit and plot
 x=distances(:,3); % practical
-y=distances(:,1); % theoretical
+% y=distances(:,1); % theoretical
+y=distances(:,2); % error
 image_counter=image_counter+num;
 figure(image_counter);
 image_counter=image_counter+1;
@@ -47,7 +49,7 @@ title('relation between practical and theoretical distance from camera to plane'
 save('bias.mat','p','distances');
 
 %% apply fitted relation
-% stereovision.m
+% topview.m
 
 %% function to calculate distance from plane to camera
 function dist = plane_camera_dist(pc, idx)
