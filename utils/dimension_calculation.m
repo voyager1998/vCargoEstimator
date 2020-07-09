@@ -1,18 +1,23 @@
-function dimension = dimension_calculation(D,C_ir,bias)
-D_denoise = imbilatfilt(D, 1500, 5);
-
+function dimension = dimension_calculation(D)
+addpath(strcat(pwd,'/utils'));
+load('calibration/panasonicIRcameraParams.mat','irCameraParams');
+C_ir = irCameraParams.IntrinsicMatrix';
+I = irCameraParams.Intrinsics;
+D = D/16;
+D_undistort = undistortImage(D,irCameraParams);
+D_denoise = imbilatfilt(D_undistort, 1500, 5);
 pc_ir = tof2pc(D_denoise, C_ir);
 
 %% eliminate bias 
-pc_ir(:,3)=polyval(bias,pc_ir(:,3));
+% bias=load('bias.mat').p;
+% pc_ir(:,3)=polyval(bias,pc_ir(:,3));
 
 %% RANSAC fit plane from tof's pc
-pc = pc_ir;
-
 numplanes = 2; % fit 2 planes: top plane and ground
 iterations = 100;
 subset_size = 3;
 
+pc = pc_ir;
 plane_models = zeros(numplanes,4);
 plane_points{1,numplanes} = [];
 for i = 1:numplanes
@@ -21,30 +26,28 @@ for i = 1:numplanes
         inlier_thres = 30;
     end
     noise_ths = ones(1, length(pc)) * inlier_thres;
-    [plane_models(i,:), outlier_ratio, plane_area, inliers, best_inliers] ...
+    [plane_models(i,:), ~, ~, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
     pc(best_inliers, :) = [];
     plane_points{i} = inliers;
 end
 
 %% find edge from depth image
-edge_thres = 0.03;
-edge_depth = edge(D_denoise,'Canny', edge_thres);
-imshow(edge_depth)
-hold on
+upper_pts = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+edge_image=detect_ROIedge(upper_pts,D_denoise);
+imshow(edge_image)
+hold on;
 
 %% RANSAC fit edge in depth image
 numlines = 4; % 4 edges of a rectangle
-edge_image = edge_depth;
 
-[rows,cols] = find(edge_image == true);
-ROI=(rows>100);
-edge_pts = [rows(ROI),cols(ROI)];
+[rows,cols]=find(edge_image==true);
+edge_pts=[rows,cols];
 line_2dmodels=zeros(numlines,2);
 k=1;
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 200; % max allowable distance for inliers
+    maxDistance = 150; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
