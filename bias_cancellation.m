@@ -49,7 +49,7 @@ xlabel('practical distance')
 ylabel('theoretical distance')
 legend('calculated point', 'fitted line')
 title('relation between practical and theoretical distance from camera to plane');
-save('bias.mat','p','distances');
+save('bias_linear.mat','p','distances');
 
 %% apply fitted relation
 % topview.m

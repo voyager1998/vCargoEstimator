@@ -1,0 +1,80 @@
+*0=without bias process; 1=pixel-wise; 2=linear-bias*
+
+bias_method=0
+/data/fix/fix70/DepthImage_0.png
+Length=304, Width=289, Height=149
+Error=-14.0
+
+/data/fix/fix70/DepthImage_1.png
+Length=305, Width=287, Height=149
+Error=-14.9
+
+/data/fix/fix80/DepthImage_0.png
+Length=302, Width=288, Height=145
+Error=-17.4
+
+/data/fix/fix80/DepthImage_1.png
+Length=305, Width=290, Height=147
+Error=-15.1
+
+/data/fix/fix90/DepthImage_0.png
+Length=301, Width=284, Height=144
+Error=-19.4
+
+/data/fix/fix90/DepthImage_1.png
+Length=303, Width=289, Height=144
+Error=-17.3
+-----------------------
+
+bias_method=1
+/data/fix/fix70/DepthImage_0.png
+Length=350, Width=313, Height=141
+Error=1.0
+
+/data/fix/fix70/DepthImage_1.png
+Length=305, Width=288, Height=141
+Error=-19.0
+
+/data/fix/fix80/DepthImage_0.png
+Length=326, Width=278, Height=135
+Error=-20.0
+
+/data/fix/fix80/DepthImage_1.png
+Length=365, Width=324, Height=133
+Error=3.4
+
+/data/fix/fix90/DepthImage_0.png
+Length=345, Width=320, Height=133
+Error=-3.8
+
+/data/fix/fix90/DepthImage_1.png
+Length=0, Width=0, Height=129
+Error=-100.0
+-----------------------
+
+bias_method=2
+/data/fix/fix70/DepthImage_0.png
+Length=305, Width=290, Height=167
+Error=-3.6
+
+/data/fix/fix70/DepthImage_1.png
+Length=304, Width=291, Height=166
+Error=-3.8
+
+/data/fix/fix80/DepthImage_0.png
+Length=306, Width=293, Height=162
+Error=-4.8
+
+/data/fix/fix80/DepthImage_1.png
+Length=311, Width=297, Height=164
+Error=-1.2
+
+/data/fix/fix90/DepthImage_0.png
+Length=312, Width=295, Height=160
+Error=-3.9
+
+/data/fix/fix90/DepthImage_1.png
+Length=313, Width=295, Height=161
+Error=-2.5
+-----------------------
+
