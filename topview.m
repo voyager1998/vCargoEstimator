@@ -5,18 +5,18 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/fix/fix90/DepthImage_1.png'));
+D = imread(strcat(pwd, '/data/fix/fix90/DepthImage_0.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
+% eliminate bias
+bias=load('bias.mat').p; % bias transformation calculated from bias_cancellation.m 
+D=double(D);
+D=polyval(bias,D);
 D_undistort = undistortImage(D,irCameraParams);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
 pc_ir = tof2pc(D_denoise, C_ir);
-
-%% eliminate bias
-p=load('bias.mat').p; % bias transformation calculated from bias_cancellation.m 
-pc_ir(:,3)=polyval(p,pc_ir(:,3));
 
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
