@@ -4,13 +4,14 @@ load('calibration/panasonicIRcameraParams.mat','irCameraParams');
 C_ir = irCameraParams.IntrinsicMatrix';
 I = irCameraParams.Intrinsics;
 D = D/16;
-D_undistort = undistortImage(D,irCameraParams);
-D_denoise = imbilatfilt(D_undistort, 1500, 5);
-pc_ir = tof2pc(D_denoise, C_ir);
+D = undistortImage(D,irCameraParams);
 
 %% eliminate bias 
 % bias=load('bias.mat').p;
-% pc_ir(:,3)=polyval(bias,pc_ir(:,3));
+% D=double(D);
+% D = polyval(bias,D);
+D_denoise = imbilatfilt(D, 1500, 5);
+pc_ir = tof2pc(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
 numplanes = 2; % fit 2 planes: top plane and ground
@@ -81,7 +82,7 @@ end
 hold off;
 
 %% Calculate height/length/width
-height = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+h = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
 
 corners=zeros(numlines.*(numlines-1),3);
 c=1;
@@ -116,5 +117,7 @@ for i=1:c-1
         k=k+1;
     end
 end
-dimension=[height distances'];
+l=(median(distances(1:3))+median(distances(4:6)))/2;
+w=(min(distances(1:3))+min(distances(4:6)))/2;
+dimension=[h l w];
 end
