@@ -1,7 +1,7 @@
 function upper_edge = detect_ROIedge(upper_pts,D_denoise)
 %% parameter to adjust
 enlarge_range = 15; % manually make the range larger
-edge_thres = 0.1;
+edge_thres = 0.5;
 
 %% find region of interest
 upper_pts = round(upper_pts);

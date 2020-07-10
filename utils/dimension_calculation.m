@@ -7,9 +7,10 @@ D = D/16;
 D = undistortImage(D,irCameraParams);
 
 %% eliminate bias 
-bias=load('bias.mat').p;
-D=double(D);
-D = polyval(bias,D);
+% if no bias.mat, run bias_cancellation.m first
+% bias=load('bias.mat').p;
+% D = double(D);
+% D = polyval(bias,D);
 D_denoise = imbilatfilt(D, 1500, 5);
 pc_ir = tof2pc(D_denoise, C_ir);
 
