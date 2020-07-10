@@ -6,6 +6,7 @@ addpath(strcat(pwd,'/utils'));
 
 % D must be a top view
 D = imread(strcat(pwd, '/data/fix/fix90/DepthImage_0.png'));
+% D=imread(strcat(pwd,'/data/data0618_1/DepthImage_0.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
@@ -21,7 +22,7 @@ pc_ir = tof2pc(D_denoise, C_ir);
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
 
-numplanes = 2; % fit 2 planes: top plane and ground
+numplanes = 4; % fit 2 planes: top plane and ground
 iterations = 100;
 subset_size = 3;
 
@@ -31,6 +32,7 @@ figure(ransac_figure);
 hold on
 plane_models = zeros(numplanes,4);
 plane_points{1,numplanes} = [];
+top_plane=1;
 for i = 1:numplanes
     inlier_thres = 10;
     if (i == 1) 
@@ -39,6 +41,14 @@ for i = 1:numplanes
     noise_ths = ones(1, length(pc)) * inlier_thres;
     [plane_models(i,:), outlier_ratio, plane_area, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
+    % find top plane
+    if i>1 && top_plane==1
+        n1=plane_models(1,1:3);
+        n2=plane_models(i,1:3);
+        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5 % parallel planes
+            top_plane=i;
+        end
+    end
     pc(best_inliers, :) = [];
     plane_points{i} = inliers;
     pcshow(inliers, [bitshift(bitand(i,4),-2) bitshift(bitand(i,2),-1) bitand(i,1)]);
@@ -50,12 +60,12 @@ ylabel('Y');
 zlabel('Z');
 hold off;
 
-%% find edge from depth image
+%% find top plane
 edge_thres = 0.1;
 
 I = irCameraParams.Intrinsics;
 % find region of interest
-upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
 upper_pos = round(upper_pos);
 upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
 for i = 1:size(upper_pos, 1)
@@ -65,65 +75,61 @@ for i = 1:size(upper_pos, 1)
     upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
 end
 upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
-upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
-upper_2D_post = bwareaopen(upper_2D_post, 5000); % reject small objects
-figure(image_counter);
-image_counter = image_counter + 1;
-imshowpair(upper_2D,upper_2D_post,'montage');
-title('2D Upper plane: before and after processing');
+upper_2D = imfill(upper_2D, 'holes'); % fill in the holes
+upper_2D = bwareaopen(upper_2D, 5000); % reject small objects
 
-% find the rectangle that contain the upper plane
-stats = regionprops(upper_2D_post);
-% show the image and draw the detected rectangles on it
-figure(image_counter);
-edge_figure = image_counter;
-image_counter = image_counter + 1;
-imagesc(upper_2D_post); 
-title('Find the Region of Interest');
-hold on;
-for i = 1:numel(stats)
-    rectangle('Position', stats(i).BoundingBox, ...
-    'Linewidth', 1, 'EdgeColor', 'r');
-end
+%% find all fitted plane in 2d
+% proj2D=zeros(size(D));
+% for k=1:numplanes
+%     pts=worldToImage(I,eye(3,3),zeros(3,1),plane_points{k}); % notice, here 2 represents the upper surface
+%     pts=round(pts);
+%     for i=1:size(pts, 1)
+%         if abs(pts(i,2))>480 || abs(pts(i,1))>640
+%             continue;
+%         end
+%         proj2D(pts(i,2), pts(i,1)) = 1;
+%     end
+% end
+% proj2D = logical(proj2D); % change from double 0,1 to logical 0,1
+% proj2D = imfill(proj2D, 'holes'); % fill in the holes
+% proj2D = bwareaopen(proj2D, 5000); % reject small objects
+% 
+% % find the rectangle that contain the upper plane
+% enlarge_range = 15; % manually make the range larger
+% [rows,cols]=find(upper_2D==true);
+% row_min=min(rows)-enlarge_range;
+% row_max=max(rows)+enlarge_range;
+% col_min=min(cols)-enlarge_range;
+% col_max=max(cols)+enlarge_range;
+% if col_min<1
+%     col_min=1;
+% end
+% if col_max>640
+%     col_max=640;
+% end
+% if row_min<1
+%     row_min=1;
+% end
+% if row_max>480
+%     row_max=480;
+% end
+% 
+% for c=col_min:col_max
+%     for r=row_min:row_max
+%         if D_denoise(r,c)<1000 && proj2D(r,c)==0
+%             upper_2D(r,c)=1;
+%         end
+%     end
+% end
 
-enlarge_range = 15; % manually make the range larger
+%% detect edge on top plane
+upper_edge = edge(upper_2D, 'Canny', edge_thres); % edge detection on the small portion of image
 
-% notice BoundingBox =  [x y width height], but image is [col row], and col is reverse from y
-col_min = round(stats.BoundingBox(2)) - enlarge_range;
-col_max = round(stats.BoundingBox(2) + stats.BoundingBox(4)) + enlarge_range;
-row_min = round(stats.BoundingBox(1)) - enlarge_range;
-row_max = round(stats.BoundingBox(1) + stats.BoundingBox(3)) + enlarge_range;
-if col_min<1
-    col_min=1;
-end
-if col_max>480
-    col_max=480;
-end
-if row_min<1
-    row_min=1;
-end
-if row_max>640
-    row_max=640;
-end
-D_smallPlane = D_denoise(col_min:col_max, row_min:row_max);
-
-D_smallEdge = edge(D_smallPlane, 'Canny', edge_thres); % edge detection on the small portion of image
-
-D_edge = zeros(size(D_denoise));
-D_edge(col_min:col_max, row_min:row_max) = D_smallEdge;
-upper_edge = bwareafilt(logical(D_edge),1); % always take out the biggest, somewhat brute force
-% upper_edge = imbilatfilt(double(upper_edge), 0.5, 5);
-
-figure(image_counter);
-image_counter = image_counter + 1;
-imshowpair(D_edge,upper_edge,'montage');
-title('Edge of depth image: before and after processing')
-
-
-figure(image_counter);
+edge_figure=image_counter;
+figure(edge_figure);
 image_counter = image_counter + 1;
 imshow(upper_edge);
-title("Method3: Edge of Upper plane");
+title("Edge of Upper plane");
 
 %% RANSAC fit edge in depth image
 numlines = 4; % 4 edges of a rectangle
