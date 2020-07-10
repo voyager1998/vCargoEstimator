@@ -5,7 +5,7 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
+D = imread(strcat(pwd, '/data/fix/fix90/DepthImage_1.png'));
 D = D/16;
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
@@ -181,13 +181,11 @@ end
 hold off;
 
 %% Calculate height/length/width
-height = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+h = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
 
 corners=zeros(numlines.*(numlines-1),3);
 c=1;
 
-figure(ransac_figure);
-hold on
 for i=1:numlines-1
     for j=i+1:numlines
         syms k1 k2
@@ -205,13 +203,10 @@ for i=1:numlines-1
             intercept1=p1+k1*u1;
             intercept1=double(intercept1);
             corners(c,:)=intercept1';
-            plot3(intercept1(1),intercept1(2),intercept1(3),'.','MarkerSize',40,'Color',[bitshift(bitand(c,4),-2) bitshift(bitand(c,2),-1) bitand(c,1)]);
             c=c+1;
         end
     end
 end
-hold off;
-
 c=c-1;
 distances=zeros(6,1);
 k=1;
@@ -221,4 +216,6 @@ for i=1:c-1
         k=k+1;
     end
 end
-% point order: blue grenn cyan red magenta yellow
+l=(median(distances(1:3))+median(distances(4:6)))/2;
+w=(min(distances(1:3))+min(distances(4:6)))/2;
+dimension=[h l w];
