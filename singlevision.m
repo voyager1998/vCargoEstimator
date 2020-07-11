@@ -16,18 +16,27 @@ rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
 rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise for the Grayscale Img from RGB
 
 %D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
-D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_5.png'));
+%D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_5.png'));
+D = imread(strcat(pwd, '/data/fix/fix90/DepthImage_1.png'));
 % D = imread(strcat(pwd, '/data/data0618_1/DepthImage_7.png'));
 D = D/16;
 
- load('calibration/panasonicIRcameraParams.mat');
-% C_ir = irCameraParams.IntrinsicMatrix';
-% D_undistort = undistortImage(D,irCameraParams);
+% eliminate bias
+load('bias.mat');
+bias=p; % bias transformation calculated from bias_cancellation.m 
+D=double(D);
+D=polyval(bias,D);
+
+% 2 choice of intrinsic matrix
+load('calibration/panasonicIRcameraParams.mat');
+C_ir = irCameraParams.IntrinsicMatrix';
+D_undistort = undistortImage(D,irCameraParams);
 
 
-load('calibration/fixorigincalibration.mat');
-C_ir = cameraParams.IntrinsicMatrix';
-D_undistort = undistortImage(D,cameraParams);
+% load('calibration/fixorigincalibration.mat');
+% C_ir = cameraParams.IntrinsicMatrix';
+% D_undistort = undistortImage(D,cameraParams);
+
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
 
@@ -77,77 +86,77 @@ zlabel('Z');
 hold off;
 
 %% Method1: Process D_denoise directly
-edge_thres = 0.05;
-D_edge = edge(D_denoise, 'Canny', edge_thres);
-upper_edge = bwareafilt(D_edge,1); % take out the biggest object
-
-figure(image_counter);
-image_counter = image_counter + 1;
-imshowpair(D_edge, upper_edge,'montage');
-title('Use depth image directly: before and after processing')
-%% Method2: Turn the upper plane back to 2D -> then process the 2D image (before performing RANSAC line fitting)
-I = irCameraParams;
-
-upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
-upper_pos = round(upper_pos);
-
-upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
-for i = 1:size(upper_pos, 1)
-    upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
-end
-
-upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
-
-upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes; may also try imerode(), imdilate()
-upper_2D_post = bwareaopen(upper_2D_post, 2000); % reject small objects; may try simply pick big objects
-
-figure(image_counter);
-image_counter = image_counter + 1;
-imshowpair(upper_2D,upper_2D_post,'montage');
-title('2D Upper plane: before and after processing')
-
-% plot, could comment out
+% edge_thres = 0.01;
+% D_edge = edge(D_denoise, 'Canny', edge_thres);
+% upper_edge = bwareafilt(D_edge,1); % take out the biggest object
+% 
 % figure(image_counter);
 % image_counter = image_counter + 1;
-% imshow(upper_2D);
+% imshowpair(D_edge, upper_edge,'montage');
+% title('Use depth image directly: before and after processing')
+% %% Method2: Turn the upper plane back to 2D -> then process the 2D image (before performing RANSAC line fitting)
+% I = irCameraParams;
+% 
+% upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+% upper_pos = round(upper_pos);
+% 
+% upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
+% for i = 1:size(upper_pos, 1)
+%     upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
+% end
+% 
+% upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
+% 
+% upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes; may also try imerode(), imdilate()
+% upper_2D_post = bwareaopen(upper_2D_post, 2000); % reject small objects; may try simply pick big objects
+% 
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% imshowpair(upper_2D,upper_2D_post,'montage');
+% title('2D Upper plane: before and after processing')
+% 
+% % plot, could comment out
+% % figure(image_counter);
+% % image_counter = image_counter + 1;
+% % imshow(upper_2D);
+% % set(gca,'dataAspectRatio',[1 1 1])
+% % title('Upper plane')
+% 
+% edge_thres = 0.05;
+% upper_edge = edge(upper_2D_post, 'Canny', edge_thres);
+% 
+% % edge_figure, should have
+% figure(image_counter);
+% edge_figure = image_counter;
+% image_counter = image_counter + 1;
+% imshow(upper_edge);
 % set(gca,'dataAspectRatio',[1 1 1])
-% title('Upper plane')
-
-edge_thres = 0.05;
-upper_edge = edge(upper_2D_post, 'Canny', edge_thres);
-
-% edge_figure, should have
-figure(image_counter);
-edge_figure = image_counter;
-image_counter = image_counter + 1;
-imshow(upper_edge);
-set(gca,'dataAspectRatio',[1 1 1])
-title('Upper plane - edge')
-
-% ------------------------------------------------------------
-% D_upperEdge, pc_upperEdge_ir are not used at this time
-% ------------------------------------------------------------
-D_upperEdge = D_denoise .* uint16(upper_edge);
-D_upperEdge(D_upperEdge == 0) = 2^12;
-
-% plot, could comment out
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% imagesc(D_upperEdge);
-% set(gca,'dataAspectRatio',[1 1 1])
-% title('Upper plane - depth')
-
-pc_upperEdge_ir = tof2pc(D_upperEdge, C_ir); 
-
-% plot, could comment out
-% figure(image_counter);
-% image_counter = image_counter + 1;
-% pcshow(pc_upperEdge_ir)
-% title('Pointcloud - Upper Edge')
-% xlabel('X')
-% ylabel('Y')
-% zlabel('Z')
-% -------------------------------------------------------
+% title('Upper plane - edge')
+% 
+% % ------------------------------------------------------------
+% % D_upperEdge, pc_upperEdge_ir are not used at this time
+% % ------------------------------------------------------------
+% D_upperEdge = D_denoise .* uint16(upper_edge);
+% D_upperEdge(D_upperEdge == 0) = 2^12;
+% 
+% % plot, could comment out
+% % figure(image_counter);
+% % image_counter = image_counter + 1;
+% % imagesc(D_upperEdge);
+% % set(gca,'dataAspectRatio',[1 1 1])
+% % title('Upper plane - depth')
+% 
+% pc_upperEdge_ir = tof2pc(D_upperEdge, C_ir); 
+% 
+% % plot, could comment out
+% % figure(image_counter);
+% % image_counter = image_counter + 1;
+% % pcshow(pc_upperEdge_ir)
+% % title('Pointcloud - Upper Edge')
+% % xlabel('X')
+% % ylabel('Y')
+% % zlabel('Z')
+% % -------------------------------------------------------
 
 %% Method 3: Most complicated - use the 2D plane to find ROI, then process the depth image
 I = irCameraParams;
@@ -208,7 +217,7 @@ upper_dege = imbilatfilt(double(upper_edge), 0.5, 5);
 figure(image_counter);
 image_counter = image_counter + 1;
 imshowpair(D_edge,upper_edge,'montage');
-title('Edge of depth image: before and after processing')
+title('Edge of depth image: before and after processing');
 
 
 figure(image_counter);
@@ -222,19 +231,19 @@ numlines = 4;
 edge_image = upper_edge; 
 
 [rows,cols] = find(edge_image == true);
-ROI=(rows>100); % need to change later on, to soft-encode
-edge_pts = [rows(ROI),cols(ROI)];
+edge_pts=[rows cols];
 line_2dmodels=zeros(numlines,2);
 k=1;
 % line_points{1,numlines}=[];
 figure(image_counter);
 image_counter = image_counter + 1;
-imagesc(edge_image);
+imshow(edge_image);
 title('Fit 4 lines');
 hold on
+
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 100; % max allowable distance for inliers
+    maxDistance = 150; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -254,64 +263,64 @@ ylim([0 480]);
 legend({},'Location','southwest');
 hold off;
 
+
 %% Method1: detect corner in depth image (2D)
-corner_2D = zeros(numlines,2);
-corner_count = 0;
-for i=1:(numlines-1)
-    for j = (i+1):numlines
-        a1 = line_2dmodels(i,1); b1 = line_2dmodels(i,2); % y = ax+b
-        a2 = line_2dmodels(j,1); b2 = line_2dmodels(j,2);
-        
-        x = (b2 - b1)/(a1 - a2); % solve a1*x + b1 = a2*x + b2
-        y = a1 * x + b1;
-        
-        if (x>0) && (x<640) && (y>0) && (y<480) 
-            corner_count = corner_count + 1;
-            corner_2D(corner_count, :) = [x y];
-        end            
-    end
-end
-
-% plot(corner_2D(:,1), corner_2D(:,2), 'o');
-
-corner_2D = round(corner_2D);
-D_corner2D = [corner_2D, zeros(size(corner_2D, 1), 1)];
-for i = 1:size(corner_2D, 1)
-    x = D_corner2D(i,1);
-    y = D_corner2D(i,2);
-    D_corner2D(i,3) = D_denoise(y, x);
-end
-
-pc_corner = pixel2pc(D_corner2D, C_ir);
-pc_corner_proj = proj2plane(pc_corner, plane_models(2,:)); % here, upper plane is 2, need to revise
-
-figure(image_counter);
-image_counter = image_counter + 1;
-pcshow(plane_points{1}, [bitshift(bitand(1,4),-2) bitshift(bitand(1,2),-1) bitand(1,1)]);
-hold on;
-pcshow(plane_points{2}, [bitshift(bitand(2,4),-2) bitshift(bitand(2,2),-1) bitand(2,1)]);
-title('Pointcloud - Upper Plane vs. Corner (2D Method)')
-xlabel('X')
-ylabel('Y')
-zlabel('Z')
-
-pcshow(pc_corner, [bitshift(bitand(5,4),-2) bitshift(bitand(5,2),-1) bitand(5,1)], 'MarkerSize',400);
-pcshow(pc_corner_proj, [bitshift(bitand(6,4),-2) bitshift(bitand(6,2),-1) bitand(6,1)], 'MarkerSize',400);
-hold off;
-
-d = []; 
-
-for i=1:3
-    for j=(i+1):4
-        dist = sqrt(sum(abs(pc_corner_proj(i,:) - pc_corner_proj(j,:)).^2));
-        d = [d dist];
-    end
-end
-    
-d % the distance is wrong because not in the same plane
+% corner_2D = zeros(numlines,2);
+% corner_count = 0;
+% for i=1:(numlines-1)
+%     for j = (i+1):numlines
+%         a1 = line_2dmodels(i,1); b1 = line_2dmodels(i,2); % y = ax+b
+%         a2 = line_2dmodels(j,1); b2 = line_2dmodels(j,2);
+%         
+%         x = (b2 - b1)/(a1 - a2); % solve a1*x + b1 = a2*x + b2
+%         y = a1 * x + b1;
+%         
+%         if (x>0) && (x<640) && (y>0) && (y<480) 
+%             corner_count = corner_count + 1;
+%             corner_2D(corner_count, :) = [x y];
+%         end            
+%     end
+% end
+% 
+% % plot(corner_2D(:,1), corner_2D(:,2), 'o');
+% 
+% corner_2D = round(corner_2D);
+% D_corner2D = [corner_2D, zeros(size(corner_2D, 1), 1)];
+% for i = 1:size(corner_2D, 1)
+%     x = D_corner2D(i,1);
+%     y = D_corner2D(i,2);
+%     D_corner2D(i,3) = D_denoise(y, x);
+% end
+% 
+% pc_corner = pixel2pc(D_corner2D, C_ir);
+% pc_corner_proj = proj2plane(pc_corner, plane_models(2,:)); % here, upper plane is 2, need to revise
+% 
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% pcshow(plane_points{1}, [bitshift(bitand(1,4),-2) bitshift(bitand(1,2),-1) bitand(1,1)]);
+% hold on;
+% pcshow(plane_points{2}, [bitshift(bitand(2,4),-2) bitshift(bitand(2,2),-1) bitand(2,1)]);
+% title('Pointcloud - Upper Plane vs. Corner (2D Method)')
+% xlabel('X')
+% ylabel('Y')
+% zlabel('Z')
+% 
+% pcshow(pc_corner, [bitshift(bitand(5,4),-2) bitshift(bitand(5,2),-1) bitand(5,1)], 'MarkerSize',400);
+% pcshow(pc_corner_proj, [bitshift(bitand(6,4),-2) bitshift(bitand(6,2),-1) bitand(6,1)], 'MarkerSize',400);
+% hold off;
+% 
+% d = []; 
+% 
+% for i=1:3
+%     for j=(i+1):4
+%         dist = sqrt(sum(abs(pc_corner_proj(i,:) - pc_corner_proj(j,:)).^2));
+%         d = [d dist];
+%     end
+% end
+%     
+% d % the distance is wrong because not in the same plane
 
 %% Method2: detect corner in point cloud (3D)
-
 p1=plane_models(2,:); % top plane
 pm_lines = zeros(numlines, 4); % plane model of lines
 
@@ -354,5 +363,17 @@ for i=1:3
         d = [d dist];
     end
 end
-    
-d % the distance is wrong because not in the same plane
+
+d;
+
+l=(median(d(1:3))+median(d(4:6)))/2;
+w=(min(d(1:3))+min(d(4:6)))/2;
+h = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+
+dimension=[h l w];
+fprintf('Length=%.0f, Width=%.0f, Height=%.0f\n',dimension(2),dimension(3),dimension(1));
+vol=dimension(2)*dimension(3)*dimension(1);
+fprintf('Vol=%.0f mm^3\n', vol);
+trueV=160*318*300;
+error=(vol-trueV)/trueV;
+fprintf('Error=%.1f\n',error*100);
