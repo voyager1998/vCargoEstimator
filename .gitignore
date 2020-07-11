@@ -5,3 +5,5 @@ data/vid/*
 data/0604/*
 data/calibration0618/*
 calibration/*.png
+venv/
+
