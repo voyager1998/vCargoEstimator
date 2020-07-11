@@ -3,14 +3,15 @@ clear; close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
-load('calibration/panasonicIRcameraParams.mat');
+% load('calibration/panasonicIRcameraParams.mat');
+irCameraParams=load('calibration/ir0710.mat').cameraParams;
 C_ir = irCameraParams.IntrinsicMatrix';
 prefix='/data/plane2/plane';
 groundtruth=[50,55,65,70,75,80,85,90,95,100,105];
 
 % prefix='/data/parallelPlaneTocheckerboard/Plane';
 % groundtruth=[50,55,60,65,70,75,80,85,90];
-numpics=1; % there are numpics depth images can be used in each distances' file
+numpics=3; % there are numpics depth images can be used in each distances' file
 dist=zeros(size(groundtruth,2),numpics);
 for num=1:size(groundtruth,2)
     figure(num);

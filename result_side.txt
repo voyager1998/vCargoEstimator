@@ -1,0 +1,332 @@
+bias_method=0
+/data/data0618_1/DepthImage_0.png
+Length=436, Width=287, Height=274
+Error=-9.2
+
+/data/data0618_1/DepthImage_1.png
+Length=437, Width=287, Height=272
+Error=-9.7
+
+-----------------------
+
+
+bias_method=2
+/data/data0618_1/DepthImage_0.png
+Length=433, Width=304, Height=292
+Error=1.7
+
+/data/data0618_1/DepthImage_1.png
+Length=458, Width=306, Height=291
+Error=7.6
+
+-----------------------
+
+
+bias_method=2
+/data/data0618_1/DepthImage_0.png
+Length=452, Width=301, Height=292
+Error=5.0
+
+/data/data0618_1/DepthImage_1.png
+Length=449, Width=306, Height=291
+Error=5.5
+
+-----------------------
+
+
+bias_method=2
+/data/data0618_1/DepthImage_0.png
+Length=457, Width=302, Height=293
+Error=6.9
+
+/data/data0618_1/DepthImage_1.png
+Length=455, Width=306, Height=291
+Error=7.2
+
+/data/data0618_1/DepthImage_2.png
+Length=455, Width=305, Height=289
+Error=6.1
+
+/data/data0618_1/DepthImage_3.png
+Length=450, Width=304, Height=286
+Error=3.7
+
+/data/data0618_1/DepthImage_4.png
+Length=444, Width=307, Height=291
+Error=4.7
+
+/data/data0618_1/DepthImage_5.png
+Length=441, Width=301, Height=290
+Error=1.6
+
+/data/data0618_1/DepthImage_6.png
+Length=447, Width=301, Height=291
+Error=3.6
+
+/data/data0618_1/DepthImage_7.png
+Length=449, Width=300, Height=288
+Error=2.4
+
+/data/data0618_1/DepthImage_8.png
+Length=448, Width=301, Height=290
+Error=3.3
+
+-----------------------
+
+
+bias_method=0
+/data/data0618_1/DepthImage_0.png
+Length=433, Width=291, Height=274
+Error=-8.8
+
+/data/data0618_1/DepthImage_1.png
+Length=437, Width=291, Height=273
+Error=-8.2
+
+/data/data0618_1/DepthImage_2.png
+Length=435, Width=294, Height=271
+Error=-8.5
+
+/data/data0618_1/DepthImage_3.png
+Length=425, Width=291, Height=265
+Error=-13.3
+
+/data/data0618_1/DepthImage_4.png
+Length=410, Width=295, Height=270
+Error=-13.6
+
+/data/data0618_1/DepthImage_5.png
+Length=420, Width=289, Height=271
+Error=-13.1
+
+/data/data0618_1/DepthImage_6.png
+Length=426, Width=287, Height=271
+Error=-12.4
+
+/data/data0618_1/DepthImage_7.png
+Length=429, Width=291, Height=269
+Error=-11.3
+
+/data/data0618_1/DepthImage_8.png
+Length=430, Width=283, Height=272
+Error=-12.4
+
+-----------------------
+
+
+bias_method=2
+/data/data0618_1/DepthImage_0.png
+Length=449, Width=302, Height=282
+Error=1.2
+
+/data/data0618_1/DepthImage_1.png
+Length=454, Width=307, Height=281
+Error=3.5
+
+/data/data0618_1/DepthImage_2.png
+Length=443, Width=306, Height=279
+Error=-0.2
+
+/data/data0618_1/DepthImage_3.png
+Length=445, Width=311, Height=274
+Error=0.1
+
+/data/data0618_1/DepthImage_4.png
+Length=441, Width=304, Height=277
+Error=-1.8
+
+/data/data0618_1/DepthImage_5.png
+Length=432, Width=299, Height=276
+Error=-5.8
+
+/data/data0618_1/DepthImage_6.png
+Length=446, Width=301, Height=277
+Error=-1.7
+
+/data/data0618_1/DepthImage_7.png
+Length=447, Width=297, Height=280
+Error=-1.7
+
+/data/data0618_1/DepthImage_8.png
+Length=451, Width=295, Height=281
+Error=-1.3
+
+-----------------------
+
+
+bias_method=0
+/data/data0618_1/DepthImage_0.png
+Length=434, Width=285, Height=273
+Error=-10.6
+
+/data/data0618_1/DepthImage_1.png
+Length=432, Width=294, Height=273
+Error=-8.7
+
+/data/data0618_1/DepthImage_2.png
+Length=428, Width=298, Height=271
+Error=-8.4
+
+/data/data0618_1/DepthImage_3.png
+Length=426, Width=296, Height=266
+Error=-11.3
+
+/data/data0618_1/DepthImage_4.png
+Length=425, Width=294, Height=270
+Error=-10.7
+
+/data/data0618_1/DepthImage_5.png
+Length=422, Width=288, Height=269
+Error=-13.5
+
+/data/data0618_1/DepthImage_6.png
+Length=423, Width=290, Height=271
+Error=-12.3
+
+/data/data0618_1/DepthImage_7.png
+Length=431, Width=285, Height=271
+Error=-11.9
+
+/data/data0618_1/DepthImage_0.png
+Length=433, Width=292, Height=274
+Error=-8.3
+
+/data/data0618_1/DepthImage_1.png
+Length=437, Width=292, Height=273
+Error=-7.7
+
+/data/data0618_1/DepthImage_2.png
+Length=433, Width=295, Height=270
+Error=-8.8
+
+/data/data0618_1/DepthImage_3.png
+Length=425, Width=296, Height=266
+Error=-11.8
+
+/data/data0618_1/DepthImage_4.png
+Length=422, Width=291, Height=271
+Error=-11.9
+
+/data/data0618_1/DepthImage_5.png
+Length=422, Width=293, Height=270
+Error=-11.6
+
+/data/data0618_1/DepthImage_6.png
+Length=429, Width=289, Height=270
+Error=-11.5
+
+/data/data0618_1/DepthImage_7.png
+Length=434, Width=284, Height=270
+Error=-12.1
+
+-----------------------
+
+
+bias_method=0
+/data/data0618_1/DepthImage_0.png
+Length=433, Width=290, Height=273
+Error=-9.5
+
+/data/data0618_1/DepthImage_1.png
+Length=438, Width=293, Height=273
+Error=-7.5
+
+/data/data0618_1/DepthImage_2.png
+Length=429, Width=296, Height=271
+Error=-9.1
+
+/data/data0618_1/DepthImage_3.png
+Length=424, Width=295, Height=267
+Error=-11.9
+
+/data/data0618_1/DepthImage_4.png
+Length=421, Width=291, Height=270
+Error=-12.5
+
+/data/data0618_1/DepthImage_5.png
+Length=422, Width=287, Height=269
+Error=-13.8
+
+/data/data0618_1/DepthImage_6.png
+Length=427, Width=288, Height=270
+Error=-12.5
+
+/data/data0618_1/DepthImage_7.png
+Length=431, Width=287, Height=271
+Error=-11.5
+
+-----------------------
+
+
+bias_method=2
+/data/data0618_1/DepthImage_0.png
+Length=454, Width=302, Height=291
+Error=5.4
+
+/data/data0618_1/DepthImage_1.png
+Length=459, Width=304, Height=290
+Error=7.2
+
+/data/data0618_1/DepthImage_2.png
+Length=452, Width=306, Height=290
+Error=5.8
+
+/data/data0618_1/DepthImage_3.png
+Length=446, Width=299, Height=287
+Error=1.2
+
+/data/data0618_1/DepthImage_4.png
+Length=445, Width=307, Height=289
+Error=4.4
+
+/data/data0618_1/DepthImage_5.png
+Length=439, Width=309, Height=290
+Error=3.8
+
+/data/data0618_1/DepthImage_6.png
+Length=446, Width=303, Height=289
+Error=3.4
+
+/data/data0618_1/DepthImage_7.png
+Length=449, Width=301, Height=289
+Error=3.3
+
+-----------------------
+
+
+bias_method=2
+/data/data0618_1/DepthImage_0.png
+Length=454, Width=305, Height=291
+Error=6.8
+
+/data/data0618_1/DepthImage_1.png
+Length=461, Width=307, Height=291
+Error=8.6
+
+/data/data0618_1/DepthImage_2.png
+Length=453, Width=306, Height=289
+Error=5.9
+
+/data/data0618_1/DepthImage_3.png
+Length=447, Width=306, Height=286
+Error=3.3
+
+/data/data0618_1/DepthImage_4.png
+Length=445, Width=304, Height=291
+Error=3.9
+
+/data/data0618_1/DepthImage_5.png
+Length=439, Width=307, Height=288
+Error=2.7
+
+/data/data0618_1/DepthImage_6.png
+Length=444, Width=302, Height=291
+Error=3.1
+
+/data/data0618_1/DepthImage_7.png
+Length=445, Width=302, Height=291
+Error=3.2
+
+-----------------------
+
+

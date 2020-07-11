@@ -19,7 +19,8 @@ addpath(strcat(pwd,'/utils'));
 % bias_method=0; % 1=pixel-wise; 2=linear-bias
 
 D = D/16;
-irCameraParams=load('calibration/panasonicIRcameraParams.mat').irCameraParams;
+% irCameraParams=load('calibration/panasonicIRcameraParams.mat').irCameraParams;
+irCameraParams=load('calibration/ir0710.mat').cameraParams;
 C_ir = irCameraParams.IntrinsicMatrix';
 D=double(D);
 % eliminate bias
@@ -81,9 +82,9 @@ hold off;
 %% project 3d top plane back to binary 2d
 edge_thres = 0.1;
 
-I = irCameraParams.Intrinsics;
+% I = irCameraParams.Intrinsics;
 % find region of interest
-upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
+upper_pos = worldToImage(irCameraParams,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
 upper_pos = round(upper_pos);
 upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
 for i = 1:size(upper_pos, 1)
@@ -160,7 +161,7 @@ figure(edge_figure);
 hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 150; % max allowable distance for inliers
+    maxDistance = 30; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -205,7 +206,7 @@ end
 hold off;
 
 %% Calculate height/length/width
-h = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+h = plane_dist(plane_models(1,:), plane_models(top_plane,:), plane_points{1}, plane_points{top_plane});
 
 corners=zeros(numlines.*(numlines-1),3);
 c=1;

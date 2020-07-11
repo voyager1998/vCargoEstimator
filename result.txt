@@ -78,3 +78,4 @@ Length=313, Width=295, Height=161
 Error=-2.5
 -----------------------
 
+/data/fix/fix70/DepthImage_0.png
