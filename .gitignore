@@ -6,4 +6,4 @@ data/0604/*
 data/calibration0618/*
 calibration/*.png
 venv/
-
+.vscode/
