@@ -5,7 +5,7 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
@@ -67,7 +67,7 @@ for i = 1:size(upper_pos, 1)
 end
 upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
 upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
-upper_2D_post = bwareaopen(upper_2D_post, 10000); % reject small objects
+upper_2D_post = bwareaopen(upper_2D_post, 5000); % reject small objects
 % find the rectangle that contain the upper plane
 stats = regionprops(upper_2D_post);
 enlarge_range = 15; % manually make the range larger
@@ -94,7 +94,6 @@ D_smallEdge = edge(D_smallPlane, 'Canny', edge_thres); % edge detection on the s
 D_edge = zeros(size(D_denoise));
 D_edge(col_min:col_max, row_min:row_max) = D_smallEdge;
 upper_edge = bwareafilt(logical(D_edge),1); % always take out the biggest, somewhat brute force
-
 edge_figure=image_counter;
 figure(edge_figure);
 image_counter = image_counter + 1;
