@@ -73,7 +73,7 @@ def load_coefficients(path):
 
 
 if __name__ == '__main__':
-    save_file = 'camera.yml'
+    save_file = 'camera2.yml'
     ret, mtx, dist, rvecs, tvecs = calibrate(square_size=0.03)
     save_coefficients(mtx, dist, save_file)
     print("Calibration is finished. RMS: ", ret)
