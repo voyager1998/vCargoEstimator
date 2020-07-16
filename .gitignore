@@ -7,3 +7,4 @@ data/calibration0618/*
 calibration/*.png
 venv/
 .vscode/
+__pycache__/
