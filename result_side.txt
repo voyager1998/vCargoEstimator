@@ -330,3 +330,91 @@ Error=3.2
 -----------------------
 
 
+bias_method=1
+/data/fix/fix70/DepthImage_0.png
+Length=373, Width=326, Height=139
+Error=10.4
+
+/data/fix/fix70/DepthImage_1.png
+Length=328, Width=300, Height=138
+Error=-11.1
+
+/data/fix/fix70/DepthImage_2.png
+Length=378, Width=363, Height=134
+Error=21.2
+
+/data/fix/fix70/DepthImage_3.png
+Length=342, Width=312, Height=134
+Error=-6.5
+
+/data/fix/fix70/DepthImage_4.png
+Length=384, Width=330, Height=135
+Error=12.1
+
+/data/fix/fix80/DepthImage_0.png
+Length=262, Width=172, Height=131
+Error=-61.2
+
+/data/fix/fix80/DepthImage_1.png
+Length=148, Width=45, Height=128
+Error=-94.4
+
+/data/fix/fix80/DepthImage_2.png
+Length=0, Width=0, Height=114
+Error=-100.0
+
+/data/fix/fix80/DepthImage_3.png
+Length=360, Width=345, Height=123
+Error=-0.1
+
+/data/fix/fix80/DepthImage_4.png
+Length=0, Width=0, Height=134
+Error=-100.0
+
+-----------------------
+
+
+bias_method=1
+/data/fix/fix70/DepthImage_0.png
+Length=369, Width=328, Height=135
+Error=7.3
+
+/data/fix/fix70/DepthImage_1.png
+Length=563, Width=412, Height=136
+Error=106.4
+
+/data/fix/fix70/DepthImage_2.png
+Length=377, Width=362, Height=132
+Error=18.3
+
+/data/fix/fix70/DepthImage_3.png
+Length=345, Width=307, Height=135
+Error=-6.5
+
+/data/fix/fix70/DepthImage_4.png
+Length=369, Width=355, Height=134
+Error=14.5
+
+/data/fix/fix80/DepthImage_0.png
+Length=260, Width=171, Height=130
+Error=-62.1
+
+/data/fix/fix80/DepthImage_1.png
+Length=0, Width=0, Height=130
+Error=-100.0
+
+/data/fix/fix80/DepthImage_2.png
+Length=0, Width=0, Height=105
+Error=-100.0
+
+/data/fix/fix80/DepthImage_3.png
+Length=362, Width=342, Height=121
+Error=-2.1
+
+/data/fix/fix80/DepthImage_4.png
+Length=295, Width=289, Height=142
+Error=-20.5
+
+-----------------------
+
+

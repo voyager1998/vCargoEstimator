@@ -6,26 +6,26 @@ addpath(strcat(pwd,'/utils'));
 fileID = fopen('result_side.txt','a');
 
 %% Choose dataset
-% true=[160 318 300];
-true=[281 433 311];
+true=[160 318 300];
+% true=[281 433 311];
 trueV=true(1)*true(2)*true(3);
-numpics=8; % #of imgs to test
+numpics=5; % #of imgs to test
 groundtruth=[70 80];
 numtest=size(groundtruth,2);
-% results=zeros(size(groundtruth,2)*numpics,3);
-results=zeros(numpics,3);
+results=zeros(size(groundtruth,2)*numpics,3);
+% results=zeros(numpics,3);
 k=1;
 
 %% Choose bias method
-bias_method=2; % 0=without bias process; 1=pixel-wise; 2=linear-bias
+bias_method=1; % 0=without bias process; 1=pixel-wise; 2=linear-bias
 fprintf(fileID,'bias_method=%d\n',bias_method);
 
 %% Calculate
-% for num=1:size(groundtruth,2)
-for num=1:1
+for num=1:size(groundtruth,2)
+% for num=1:1
     for idx=1:numpics
-        filename=['/data/data0618_1/DepthImage_' num2str(idx-1,'%d'), '.png'];
-%         filename=['/data/fix/fix' num2str(groundtruth(num),'%d') '/DepthImage_' num2str(idx-1,'%d'), '.png'];
+%         filename=['/data/data0618_1/DepthImage_' num2str(idx-1,'%d'), '.png'];
+        filename=['/data/fix/fix' num2str(groundtruth(num),'%d') '/DepthImage_' num2str(idx-1,'%d'), '.png'];
         D = imread(strcat(pwd, filename));
         fprintf(fileID,filename);
         fprintf(fileID,'\n');
