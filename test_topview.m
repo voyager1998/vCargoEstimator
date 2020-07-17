@@ -24,7 +24,7 @@ results=zeros(numpics,3);
 k=1;
 
 %% Choose bias method
-bias_method=1; % 0=without bias process; 1=pixel-wise; 2=linear-bias
+bias_method=0; % 0=without bias process; 1=pixel-wise; 2=linear-bias
 fprintf(fileID,'bias_method=%d\n',bias_method);
 
 %% Calculate

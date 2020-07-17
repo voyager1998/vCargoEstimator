@@ -270,3 +270,189 @@ Error=2.4
 -----------------------
 
 
+bias_method=1
+/data/top_view/DepthImage_0.png
+bias_method=1
+/data/top_view/DepthImage_0.png
+bias_method=1
+/data/top_view/DepthImage_0.png
+bias_method=0
+/data/top_view/DepthImage_0.png
+bias_method=0
+/data/top_view/DepthImage_0.png
+Length=305, Width=289, Height=149
+Error=-13.9
+
+/data/top_view/DepthImage_1.png
+Length=301, Width=288, Height=148
+Error=-15.7
+
+/data/top_view/DepthImage_2.png
+Length=296, Width=3, Height=149
+Error=-99.3
+
+/data/top_view/DepthImage_3.png
+Length=303, Width=288, Height=149
+Error=-14.9
+
+/data/top_view/DepthImage_4.png
+Length=298, Width=5, Height=149
+Error=-98.6
+
+/data/top_view/DepthImage_5.png
+Length=304, Width=285, Height=148
+Error=-15.6
+
+/data/top_view/DepthImage_6.png
+Length=306, Width=290, Height=149
+Error=-13.2
+
+/data/top_view/DepthImage_7.png
+Length=301, Width=288, Height=145
+Error=-17.6
+
+/data/top_view/DepthImage_8.png
+Length=301, Width=13, Height=146
+Error=-96.3
+
+/data/top_view/DepthImage_9.png
+Length=292, Width=6, Height=143
+Error=-98.4
+
+-----------------------
+
+
+bias_method=0
+/data/top_view/DepthImage_0.png
+bias_method=0
+/data/top_view/DepthImage_0.png
+Length=304, Width=288, Height=149
+Error=-14.3
+
+/data/top_view/DepthImage_1.png
+Length=303, Width=287, Height=149
+Error=-15.2
+
+/data/top_view/DepthImage_2.png
+Length=299, Width=24, Height=149
+Error=-93.0
+
+/data/top_view/DepthImage_3.png
+Length=305, Width=288, Height=149
+Error=-14.3
+
+/data/top_view/DepthImage_4.png
+Length=297, Width=3, Height=149
+Error=-99.1
+
+/data/top_view/DepthImage_5.png
+Length=302, Width=287, Height=148
+Error=-15.9
+
+/data/top_view/DepthImage_6.png
+Length=305, Width=289, Height=149
+Error=-13.7
+
+/data/top_view/DepthImage_7.png
+Length=302, Width=286, Height=145
+Error=-18.0
+
+/data/top_view/DepthImage_8.png
+Length=304, Width=297, Height=147
+Error=-13.3
+
+/data/top_view/DepthImage_9.png
+Length=298, Width=3, Height=143
+Error=-99.1
+
+-----------------------
+
+
+bias_method=0
+/data/top_view/DepthImage_0.png
+Length=305, Width=289, Height=149
+Error=-13.8
+
+/data/top_view/DepthImage_1.png
+Length=303, Width=288, Height=149
+Error=-15.2
+
+/data/top_view/DepthImage_2.png
+Length=300, Width=5, Height=149
+Error=-98.5
+
+/data/top_view/DepthImage_3.png
+Length=303, Width=288, Height=149
+Error=-15.0
+
+/data/top_view/DepthImage_4.png
+Length=299, Width=12, Height=148
+Error=-96.5
+
+/data/top_view/DepthImage_5.png
+Length=303, Width=286, Height=148
+Error=-15.8
+
+/data/top_view/DepthImage_6.png
+Length=306, Width=289, Height=149
+Error=-13.3
+
+/data/top_view/DepthImage_7.png
+Length=301, Width=288, Height=145
+Error=-17.6
+
+/data/top_view/DepthImage_8.png
+Length=300, Width=13, Height=146
+Error=-96.3
+
+/data/top_view/DepthImage_9.png
+Length=302, Width=1, Height=143
+Error=-99.6
+
+-----------------------
+
+
+bias_method=0
+/data/top_view/DepthImage_0.png
+Length=308, Width=285, Height=149
+Error=-14.2
+
+/data/top_view/DepthImage_1.png
+Length=304, Width=287, Height=148
+Error=-15.2
+
+/data/top_view/DepthImage_2.png
+Length=150, Width=0, Height=149
+Error=-100.0
+
+/data/top_view/DepthImage_3.png
+Length=305, Width=287, Height=149
+Error=-14.6
+
+/data/top_view/DepthImage_4.png
+Length=150, Width=1, Height=149
+Error=-99.9
+
+/data/top_view/DepthImage_5.png
+Length=306, Width=284, Height=148
+Error=-15.8
+
+/data/top_view/DepthImage_6.png
+Length=309, Width=289, Height=150
+Error=-12.7
+
+/data/top_view/DepthImage_7.png
+Length=298, Width=293, Height=145
+Error=-17.2
+
+/data/top_view/DepthImage_8.png
+Length=303, Width=301, Height=146
+Error=-12.7
+
+/data/top_view/DepthImage_9.png
+Length=310, Width=54, Height=143
+Error=-84.3
+
+-----------------------
+
+
