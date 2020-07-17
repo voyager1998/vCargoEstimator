@@ -1,0 +1,15 @@
+rgbFolder = 'C:/Users/Alexander/Documents/Chessboard/RGB/'
+irFolder = 'C:/Users/Alexander/Documents/Chessboard/IR/'
+depthFolder = 'C:/Users/Alexander/Documents/Chessboard/Depth/'
+rgbCameraIntrinsic = 'C:/Users/Alexander/Documents/Chessboard/CalibrationResults/RGB'
+irCameraIntrinsic = 'C:/Users/Alexander/Documents/Chessboard/CalibrationResults/IR'
+distanceErrorFunction = 'C:/Users/Alexander/Documents/Chessboard/CalibrationResults/DistanceError'
+pictureFolder = 'C:/Users/Alexander/Documents/KinectData/'
+square_size = 0.0263571 #metres
+pattern_size = (6, 5)
+rgbToIR = 'C:/Users/Alexander/Documents/Chessboard/CalibrationResults/rgbToIR'
+ir_image_size = (424,512)
+rgb_image_size = (1080,1920)
+indexForBackground = 255
+numberOfDepthFramesForDepthCalibration = 100
+numberOfDistanceForDepthCalibration = 25
