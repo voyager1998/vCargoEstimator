@@ -17,7 +17,7 @@ def draw(img, corner, imgpts):
 
 
 def calibrateDepth(square_size, width=6, height=5, irPrefix='GrayImage_', depthPrefix='DepthImage_',
-                   image_format='png', dirpath='../data/calibration0712/plane*'):
+                   imgID='*', image_format='png', dirpath='../data/calibration0712/plane*', ifVisualization=False):
     gtDistances = []
     tofs = []
     """ Apply camera calibration operation for images in the given directory path. """
@@ -27,14 +27,22 @@ def calibrateDepth(square_size, width=6, height=5, irPrefix='GrayImage_', depthP
     axis = np.float32([[axis_length, 0, 0], [0, axis_length, 0], [
                       0, 0, -axis_length]]).reshape(-1, 3)
 
-    for fname in glob.glob(dirpath + '/' + irPrefix + '*.' + image_format):
-        fileID = os.path.splitext(fname)[0][-1]
+    numfiles = len(glob.glob(dirpath + '/' + irPrefix +
+                             imgID + '.' + image_format))
+    print("There are ", numfiles, " files")
+    for fname in glob.glob(dirpath + '/' + irPrefix + imgID + '.' + image_format):
         print("---------------------------- image ",
-              fileID, " ----------------------------")
-        path, f = os.path.split(fname)
+              fname, " ----------------------------")
+        # fileID = os.path.splitext(fname)[0][-1]
+        fileID = fname.split('_')[-1]
+        fileID = fileID.split('.')[0]
+        print(fileID)
+        path, _ = os.path.split(fname)
         tofimg = cv2.imread(path + '/' + depthPrefix +
                             fileID + '.' + image_format, -1)
         print(tofimg.dtype)
+        if ifVisualization:
+            cv2.imshow('tof image', tofimg)
 
         irimg = cv2.imread(fname)
         gray = cv2.cvtColor(irimg, cv2.COLOR_BGR2GRAY)
@@ -63,12 +71,13 @@ def calibrateDepth(square_size, width=6, height=5, irPrefix='GrayImage_', depthP
                 print("tof image pixel value: ", tof)
                 tofs.append(tof)
 
-                imgMark = irimg.copy()
-                imgpts, jac = cv2.projectPoints(
-                    objp[i]+axis, rvecs, tvecs, mtx, dist)
-                imgMark = draw(imgMark, corners2[i], imgpts)
-                cv2.imshow('imgMark', imgMark)
-                # cv2.waitKey(100)
+                if ifVisualization:
+                    imgMark = irimg.copy()
+                    imgpts, jac = cv2.projectPoints(
+                        objp[i]+axis, rvecs, tvecs, mtx, dist)
+                    imgMark = draw(imgMark, corners2[i], imgpts)
+                    cv2.imshow('imgMark', imgMark)
+                    cv2.waitKey(0)
     cv2.destroyAllWindows()
     return gtDistances, tofs
 
@@ -77,13 +86,46 @@ if __name__ == '__main__':
     # Load previously saved data
     mtx, dist = load_coefficients('irCamera.yml')
 
-    dirpath = '../data/calibration0712/plane*'
     square_size = 26.3571  # 13.1923  #26.3571
     width = 6  # 13 #6
     height = 5  # 6 #5
 
-    gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
-                                       height=height, dirpath=dirpath)
+    allgtDistances = []
+    alltofs = []
 
-    plt.plot(gtDistances, tofs, 'ro')
+    dirpath = '../data/calibration0712/plane*'
+    gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
+                                       height=height, imgID='*', dirpath=dirpath)
+    allgtDistances += gtDistances
+    alltofs += tofs
+
+    dirpath = '../data/calibration0716/1'
+    gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
+                                       height=height, imgID='*', dirpath=dirpath)
+    allgtDistances += gtDistances
+    alltofs += tofs
+
+    dirpath = '../data/calibration0716/2'
+    gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
+                                       height=height, imgID='*', dirpath=dirpath)
+    allgtDistances += gtDistances
+    alltofs += tofs
+
+    plt.plot(alltofs, allgtDistances, 'ro')
+
+    A = np.vstack([alltofs, np.ones(len(alltofs))]).T
+    m, c = np.linalg.lstsq(A, allgtDistances, rcond=None)[0]
+    print("----------- Result: y = ", m, " * x + ", c)
+    plt.plot(alltofs, m * np.array(alltofs) + c,
+             'b', label='Fitted line')
+    plt.legend()
+    plt.xlabel('tof camera value')
+    plt.ylabel('ground truth value')
     plt.show()
+
+    save_file = 'tofCamera.yml'
+    cv_file = cv2.FileStorage(save_file, cv2.FILE_STORAGE_WRITE)
+    cv_file.write("m", m)
+    cv_file.write("c", c)
+    # gt = m * tof + c
+    cv_file.release()  # note you *release* you don't close() a FileStorage object
