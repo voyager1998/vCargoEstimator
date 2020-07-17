@@ -32,7 +32,7 @@ elseif bias_method==2
 end
 D_denoise = imbilatfilt(D, 1500, 5);
 
-pc_ir = tof2pc(D_denoise, C_ir);
+pc_ir = tof2pc_mat(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
 numplanes = 4; % fit 2 planes: top plane and ground
