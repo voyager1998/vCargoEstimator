@@ -93,23 +93,23 @@ if __name__ == '__main__':
     allgtDistances = []
     alltofs = []
 
-    dirpath = '../data/calibration0712/plane*'
-    gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
-                                       height=height, imgID='*', dirpath=dirpath)
-    allgtDistances += gtDistances
-    alltofs += tofs
+    # dirpath = '../data/calibration0712/plane*'
+    # gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
+    #                                    height=height, imgID='*', dirpath=dirpath)
+    # allgtDistances += gtDistances
+    # alltofs += tofs
 
     dirpath = '../data/calibration0716/1'
     gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
-                                       height=height, imgID='*', dirpath=dirpath)
+                                       height=height, imgID='0', dirpath=dirpath)
     allgtDistances += gtDistances
     alltofs += tofs
 
-    dirpath = '../data/calibration0716/2'
-    gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
-                                       height=height, imgID='*', dirpath=dirpath)
-    allgtDistances += gtDistances
-    alltofs += tofs
+    # dirpath = '../data/calibration0716/2'
+    # gtDistances, tofs = calibrateDepth(square_size=square_size, width=width,
+    #                                    height=height, imgID='*', dirpath=dirpath)
+    # allgtDistances += gtDistances
+    # alltofs += tofs
 
     plt.plot(alltofs, allgtDistances, 'ro')
 

@@ -1,0 +1,181 @@
+corner 0 (223, 179): tof depth = 236.000000 stereo depth = 212.488938
+corner 1 (272, 180): tof depth = 243.000000 stereo depth = 261.837983
+corner 2 (322, 181): tof depth = 254.000000 stereo depth = 318.562285
+corner 3 (373, 182): tof depth = 275.000000 stereo depth = 379.025538
+corner 4 (423, 184): tof depth = 301.000000 stereo depth = 437.279877
+corner 5 (472, 186): tof depth = 372.000000 stereo depth = 487.707300
+corner 6 (225, 228): tof depth = 230.000000 stereo depth = 245.837655
+corner 7 (272, 229): tof depth = 235.000000 stereo depth = 294.212434
+corner 8 (321, 230): tof depth = 247.000000 stereo depth = 349.337601
+corner 9 (371, 232): tof depth = 268.000000 stereo depth = 408.370985
+corner 10 (420, 233): tof depth = 289.000000 stereo depth = 464.350833
+corner 11 (468, 234): tof depth = 389.000000 stereo depth = 513.175433
+corner 12 (226, 274): tof depth = 221.000000 stereo depth = 280.662025
+corner 13 (273, 276): tof depth = 225.000000 stereo depth = 327.378159
+corner 14 (321, 278): tof depth = 241.000000 stereo depth = 380.344768
+corner 15 (369, 279): tof depth = 260.000000 stereo depth = 436.002419
+corner 16 (417, 280): tof depth = 282.000000 stereo depth = 488.771098
+corner 17 (464, 281): tof depth = 396.000000 stereo depth = 534.137607
+corner 18 (229, 318): tof depth = 219.000000 stereo depth = 314.004308
+corner 19 (274, 320): tof depth = 228.000000 stereo depth = 358.902669
+corner 20 (320, 322): tof depth = 240.000000 stereo depth = 408.413040
+corner 21 (367, 324): tof depth = 231.000000 stereo depth = 460.192090
+corner 22 (413, 324): tof depth = 273.000000 stereo depth = 508.469286
+corner 23 (459, 325): tof depth = 386.000000 stereo depth = 550.015059
+corner 24 (231, 359): tof depth = 224.000000 stereo depth = 344.426320
+corner 25 (275, 361): tof depth = 230.000000 stereo depth = 386.537784
+corner 26 (320, 363): tof depth = 229.000000 stereo depth = 432.637427
+corner 27 (365, 365): tof depth = 253.000000 stereo depth = 479.744080
+corner 28 (410, 365): tof depth = 273.000000 stereo depth = 523.525898
+corner 29 (454, 366): tof depth = 389.000000 stereo depth = 560.593648
+
+-------------- corner  0  --------------
+This corner is from  [0. 0. 0.]  to  [[-60.58780514 -33.2608921  200.04042593]]
+ground truth distance:  211.6443740841833
+2D coordinate:  [[223.7841  179.72807]]
+tof image pixel value:  228
+-------------- corner  1  --------------
+This corner is from  [26.3571  0.      0.    ]  to  [[-34.24526126 -32.53569866 199.54933316]]
+ground truth distance:  205.064004567508
+2D coordinate:  [[272.3942  180.16826]]
+tof image pixel value:  217
+-------------- corner  2  --------------
+This corner is from  [52.7142  0.      0.    ]  to  [[ -7.90271738 -31.81050523 199.05824038]]
+ground truth distance:  201.73880204024618
+2D coordinate:  [[322.7318  181.04611]]
+tof image pixel value:  217
+-------------- corner  3  --------------
+This corner is from  [79.0713  0.      0.    ]  to  [[ 18.4398246  -31.08531185 198.56714764]]
+ground truth distance:  201.8297199786752
+2D coordinate:  [[373.66098 182.41   ]]
+tof image pixel value:  215
+-------------- corner  4  --------------
+This corner is from  [105.4284   0.       0.    ]  to  [[ 44.78237039 -30.36011836 198.07605483]]
+ground truth distance:  205.33222100331815
+2D coordinate:  [[423.7528  184.18248]]
+tof image pixel value:  223
+-------------- corner  5  --------------
+This corner is from  [131.7855   0.       0.    ]  to  [[ 71.1249238  -29.63492466 197.58496188]]
+ground truth distance:  212.07734604711382
+2D coordinate:  [[472.63754 186.0747 ]]
+tof image pixel value:  234
+-------------- corner  6  --------------
+This corner is from  [ 0.     26.3571  0.    ]  to  [[-61.19890073  -7.45509524 205.36809958]]
+ground truth distance:  214.4223407664725
+2D coordinate:  [[225.12276 228.38753]]
+tof image pixel value:  230
+-------------- corner  7  --------------
+This corner is from  [26.3571 26.3571  0.    ]  to  [[-34.85635685  -6.72990181 204.8770068 ]]
+ground truth distance:  207.92990431284886
+2D coordinate:  [[272.81647 229.50656]]
+tof image pixel value:  221
+-------------- corner  8  --------------
+This corner is from  [52.7142 26.3571  0.    ]  to  [[ -8.51381297  -6.00470837 204.38591403]]
+ground truth distance:  204.65127262472905
+2D coordinate:  [[321.74792 230.92859]]
+tof image pixel value:  220
+-------------- corner  9  --------------
+This corner is from  [79.0713 26.3571  0.    ]  to  [[ 17.82872901  -5.27951499 203.89482129]]
+ground truth distance:  204.74089724566014
+2D coordinate:  [[371.74042 232.33136]]
+tof image pixel value:  226
+-------------- corner  10  --------------
+This corner is from  [105.4284  26.3571   0.    ]  to  [[ 44.1712748   -4.5543215  203.40372848]]
+ground truth distance:  208.19442864890266
+2D coordinate:  [[420.46432 233.60968]]
+tof image pixel value:  229
+-------------- corner  11  --------------
+This corner is from  [131.7855  26.3571   0.    ]  to  [[ 70.51382821  -3.82912781 202.91263553]]
+ground truth distance:  214.849714555721
+2D coordinate:  [[468.7782  234.97424]]
+tof image pixel value:  236
+-------------- corner  12  --------------
+This corner is from  [ 0.     52.7142  0.    ]  to  [[-61.80999632  18.35070162 210.69577322]]
+ground truth distance:  220.3404927598517
+2D coordinate:  [[226.94354 274.92398]]
+tof image pixel value:  233
+-------------- corner  13  --------------
+This corner is from  [26.3571 52.7142  0.    ]  to  [[-35.46745244  19.07589505 210.20468045]]
+ground truth distance:  214.02765624430754
+2D coordinate:  [[273.2148  276.70776]]
+tof image pixel value:  229
+-------------- corner  14  --------------
+This corner is from  [52.7142 52.7142  0.    ]  to  [[ -9.12490856  19.80108849 209.71358767]]
+ground truth distance:  210.84386620625745
+2D coordinate:  [[321.22318 278.26233]]
+tof image pixel value:  223
+-------------- corner  15  --------------
+This corner is from  [79.0713 52.7142  0.    ]  to  [[ 17.21763342  20.52628187 209.22249494]]
+ground truth distance:  210.93085960768988
+2D coordinate:  [[369.6867  279.72003]]
+tof image pixel value:  231
+-------------- corner  16  --------------
+This corner is from  [105.4284  52.7142   0.    ]  to  [[ 43.56017921  21.25147536 208.73140213]]
+ground truth distance:  214.28465332432006
+2D coordinate:  [[417.24887 280.70892]]
+tof image pixel value:  230
+-------------- corner  17  --------------
+This corner is from  [131.7855  52.7142   0.    ]  to  [[ 69.90273262  21.97666905 208.24030917]]
+ground truth distance:  220.75640958884026
+2D coordinate:  [[464.1295  281.57074]]
+tof image pixel value:  240
+-------------- corner  18  --------------
+This corner is from  [ 0.     79.0713  0.    ]  to  [[-62.42109187  44.15649661 216.02344649]]
+ground truth distance:  229.1556639800028
+2D coordinate:  [[229.10544 318.63843]]
+tof image pixel value:  242
+-------------- corner  19  --------------
+This corner is from  [26.3571 79.0713  0.    ]  to  [[-36.07854799  44.88169004 215.53235371]]
+ground truth distance:  223.0924096017011
+2D coordinate:  [[274.5135 320.7518]]
+tof image pixel value:  238
+-------------- corner  20  --------------
+This corner is from  [52.7142 79.0713  0.    ]  to  [[ -9.7360041   45.60688348 215.04126094]]
+ground truth distance:  220.03981799043524
+2D coordinate:  [[320.54843 322.79578]]
+tof image pixel value:  243
+-------------- corner  21  --------------
+This corner is from  [79.0713 79.0713  0.    ]  to  [[ 16.60653787  46.33207686 214.5501682 ]]
+ground truth distance:  220.12317715156817
+2D coordinate:  [[367.68594 324.07874]]
+tof image pixel value:  237
+-------------- corner  22  --------------
+This corner is from  [105.4284  79.0713   0.    ]  to  [[ 42.94908366  47.05727035 214.05907539]]
+ground truth distance:  223.33897607624542
+2D coordinate:  [[413.68668 324.9281 ]]
+tof image pixel value:  245
+-------------- corner  23  --------------
+This corner is from  [131.7855  79.0713   0.    ]  to  [[ 69.29163707  47.78246404 213.56798243]]
+ground truth distance:  229.55560973110087
+2D coordinate:  [[459.3428 325.5491]]
+tof image pixel value:  258
+-------------- corner  24  --------------
+This corner is from  [  0.     105.4284   0.    ]  to  [[-63.0321875   69.96229533 221.35112052]]
+ground truth distance:  240.54957489922268
+2D coordinate:  [[231.81868 359.25336]]
+tof image pixel value:  260
+-------------- corner  25  --------------
+This corner is from  [ 26.3571 105.4284   0.    ]  to  [[-36.68964362  70.68748877 220.86002774]]
+ground truth distance:  234.78075490119278
+2D coordinate:  [[275.3996  361.81866]]
+tof image pixel value:  261
+-------------- corner  26  --------------
+This corner is from  [ 52.7142 105.4284   0.    ]  to  [[-10.34709974  71.4126822  220.36893497]]
+ground truth distance:  231.8820845846972
+2D coordinate:  [[320.22055 363.78003]]
+tof image pixel value:  253
+-------------- corner  27  --------------
+This corner is from  [ 79.0713 105.4284   0.    ]  to  [[ 15.99544224  72.13787558 219.87784223]]
+ground truth distance:  231.9611880668433
+2D coordinate:  [[365.53375 365.2181 ]]
+tof image pixel value:  253
+-------------- corner  28  --------------
+This corner is from  [105.4284 105.4284   0.    ]  to  [[ 42.33798802  72.86306907 219.38674942]]
+ground truth distance:  235.01505884701623
+2D coordinate:  [[410.2155 365.9306]]
+tof image pixel value:  264
+-------------- corner  29  --------------
+This corner is from  [131.7855 105.4284   0.    ]  to  [[ 68.68054144  73.58826277 218.89565647]]
+ground truth distance:  240.93060745596082
+2D coordinate:  [[454.1301 366.1085]]
+tof image pixel value:  267
