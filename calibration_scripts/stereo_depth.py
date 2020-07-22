@@ -5,19 +5,26 @@ def cal_depth():
     M1, d1 = load_coefficients('./rgbCamera.yml')
     M2, d2 = load_coefficients('./irCamera.yml')
     R, T = load_coefficients('./stereo.yml')
-    R1, R2, P1, P2, Q, _, _ = cv2.stereoRectify( M1, d1, M2, d2,
-        (640, 480), R, T, flags=cv2.CALIB_ZERO_DISPARITY)
+    # R1, R2, P1, P2, Q, _, _ = cv2.stereoRectify( M1, d1, M2, d2,
+    #     (640, 480), R, T, flags=cv2.CALIB_ZERO_DISPARITY)
+    P1 = np.append(M1, np.zeros([len(M1), 1]), 1)
+    print('P1 is', P1)
+    transformation = np.append(R, T, 1)
+    P2 = M2.dot(transformation)
+    print('P2 is', P2)
     
     corners_rgb, corners_tof = find_corners()
-    print(corners_rgb)
+    # print(corners_rgb)
     points4D = cv2.triangulatePoints(P1, P2, corners_rgb, corners_tof)
-    print('P1 is', P1)
-    print('P2 is', P2)
+    points4D /= points4D[3]
     print('4D points', points4D)
-    points3D_tof = np.dot(P2, points4D) # P2=3*4 points4D=4*30 points3D_tpf=3*30
-    distances = np.linalg.norm(points3D_tof ,axis=0)
+
+    # points3D_tof = np.dot(P2, points4D) # P2=3*4 points4D=4*30 points3D_tpf=3*30
+    points3D_tof = transformation.dot(points4D)
+    print(points3D_tof)
+    distances = np.linalg.norm(points3D_tof, axis=0)
     img_depth = cv2.imread('../data/calibration0716/1/DepthImage_0.png',-1)
-    print(corners_tof)
+    # print(corners_tof)
     for i in range(len(corners_tof)):
         corner = corners_tof[i][0]
         x = int(corner[0])
