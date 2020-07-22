@@ -16,12 +16,122 @@ def draw(img, corner, imgpts):
     return img
 
 
+def visual_tf(img, objp_i, axis, rvecs, tvecs, mtx, dist, corners2_i):
+    imgMark = img.copy()
+    imgpts, _ = cv2.projectPoints(
+        objp_i+axis, rvecs, tvecs, mtx, dist)  # objp[i]: 3 vector
+    imgMark = draw(imgMark, corners2_i, imgpts)
+    cv2.imshow('imgMark', imgMark)
+    cv2.waitKey(0)
+
+
+def read_tof(tofimg, i, j, ifDivide16):
+    # corners2: x, y!!! not row, col!!!
+    tof = tofimg[i, j]
+    print("tof image pixel value original: ", bin(tof))
+    if ifDivide16:
+        tof /= 16.0
+    print("tof image pixel value: ", tof)
+    return tof
+
+
+def expand_corners(i, width, height, objp, square_size, rvecsM, tvecs, mtx, dist, tofimg, ifDivide16):
+    """ project 4 corners to image plane """
+    gtDist = 0
+    tof = 0
+    ret = False
+    if i == 0 or i == width - 1 or i == width * (height - 1) or i == width * height - 1:
+        if i == 0:
+            print("-------------- top left corner --------------")
+            objptl = objp[i].reshape(
+                (3, 1)) + np.float32([-square_size, -square_size, 0]).reshape(3, 1)
+        elif i == width - 1:
+            print("-------------- top right corner --------------")
+            objptl = objp[i].reshape(
+                (3, 1)) + np.float32([square_size, -square_size, 0]).reshape(3, 1)
+        elif i == width * (height - 1):
+            print("-------------- bottom left corner --------------")
+            objptl = objp[i].reshape(
+                (3, 1)) + np.float32([-square_size, square_size, 0]).reshape(3, 1)
+        elif i == width * height - 1:
+            print("-------------- bottom right corner --------------")
+            objptl = objp[i].reshape(
+                (3, 1)) + np.float32([+square_size, square_size, 0]).reshape(3, 1)
+
+        pt3 = rvecsM.dot(objptl) + tvecs
+        print("This corner is from ", objptl.reshape(
+            (1, 3)), " to ", pt3.reshape((1, 3)))
+        gtDist = np.linalg.norm(pt3)
+        print("ground truth distance: ", gtDist)
+
+        pt2d, _ = cv2.projectPoints(
+            pt3, np.identity(3), np.zeros((3, 1)), mtx, dist)
+        print("projected corner coordinate: ", pt2d)  # 1 x 1 x 2 matrix
+
+        tof = read_tof(tofimg, int(
+            pt2d[0][0][1]), int(pt2d[0][0][0]), ifDivide16)
+        ret = True
+    return ret, gtDist, tof
+
+
+def cv_dist(irimg, width, height, square_size, mtx, dist, ifVisualization=False):
+    gtDistances = []
+    objp = np.zeros((height*width, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:width,
+                           0:height].T.reshape(-1, 2) * square_size  # n x 3 matrix
+    axis_length = 2 * square_size
+    axis = np.float32([[axis_length, 0, 0], [0, axis_length, 0], [
+                      0, 0, -axis_length]]).reshape(-1, 3)
+
+    gray = cv2.cvtColor(irimg, cv2.COLOR_BGR2GRAY)
+    ret, corners = cv2.findChessboardCorners(
+        gray, (width, height), None)  # corners: 1 x 2 matrix
+    if ret == False:
+        print("Corners not found")
+    else:
+        corners2 = cv2.cornerSubPix(
+            gray, corners, (11, 11), (-1, -1), criteria)
+        if ifVisualization:
+            cornerimg = irimg.copy()
+            cornerimg = cv2.drawChessboardCorners(
+                cornerimg, (width, height), corners2, ret)
+            cv2.imshow('chessboard', cornerimg)
+            cv2.waitKey(0)
+
+        """ Find the rotation and translation vectors. """
+        ret, rvecs, tvecs = cv2.solvePnP(objp, corners2, mtx, dist)
+        print("translation: ", tvecs)
+        rvecsM, _ = cv2.Rodrigues(rvecs)
+        print("rotation matrix: ", rvecsM)
+
+        """ project 3D corners to image plane """
+        for i in range(len(corners2)):
+            print("-------------- corner ", i, " --------------")
+            pt3 = rvecsM.dot(objp[i].reshape((3, 1))) + tvecs
+            print("This corner is from ",
+                    objp[i], " to ", pt3.reshape((1, 3)))
+            gtDist = np.linalg.norm(pt3)
+            print("ground truth distance: ", gtDist)
+            gtDistances.append(gtDist)
+
+            print("2D Corner coordinate: ", corners2[i])
+            pt2d, _ = cv2.projectPoints(
+                pt3, np.identity(3), np.zeros((3, 1)), mtx, dist)
+            print("projected corner coordinate: ", pt2d)
+
+            if ifVisualization:
+                visual_tf(irimg, objp[i], axis, rvecs,
+                            tvecs, mtx, dist, corners2[i])
+    cv2.destroyAllWindows()
+
+
 def calibrateDepth(square_size, mtx, dist, width=6, height=5,
                    irPrefix='GrayImage_', depthPrefix='DepthImage_', rgbPrefix='RGBImage_',
                    imgID='*', image_format='png', dirpath='../data/calibration0712/plane*',
                    ifVisualization=False, ifDivide16=False, ifUseRGB=True):
     gtDistances = []
     tofs = []
+    stereo_distances = []
     """ Apply camera calibration operation for images in the given directory path. """
     objp = np.zeros((height*width, 3), np.float32)
     objp[:, :2] = np.mgrid[0:width,
@@ -76,52 +186,28 @@ def calibrateDepth(square_size, mtx, dist, width=6, height=5,
             rvecsM, _ = cv2.Rodrigues(rvecs)
             print("rotation matrix: ", rvecsM)
 
-            if ifUseRGB:
+            if ifUseRGB and retRGB:
                 cornersRGB2 = cv2.cornerSubPix(
                     rgbgray, cornersRGB, (11, 11), (-1, -1), criteria)
+                if ifVisualization:
+                    cornerimg = rgbimg.copy()
+                    cornerimg = cv2.drawChessboardCorners(
+                        cornerimg, (width, height), cornersRGB2, retRGB)
+                    cv2.imshow('chessboard RGB', cornerimg)
+                    cv2.waitKey(0)
                 # Find the rotation and translation vectors.
                 retRGB, rvecsRGB, tvecsRGB = cv2.solvePnP(
                     objp, cornersRGB2, rgbIntrinsic, rgbDist)
                 print("translation in RGB: ", tvecsRGB)
-
-
+                stereo_dists = stereo_depth(rgbIntrinsic, rgbDist, mtx, dist, R, T, cornersRGB2, corners2)
 
             """ project 3D corners to image plane """
             for i in range(len(corners2)):
-                """ project 4 corners to image plane """
-                if i == 0 or i == width - 1 or i == width * (height - 1) or i == width * height - 1:
-                    if i == 0:
-                        print("-------------- top left corner --------------")
-                        objptl = objp[i].reshape((3, 1)) + np.float32([-square_size, -square_size, 0]).reshape(3, 1)
-                    elif i == width - 1:
-                        print("-------------- top right corner --------------")
-                        objptl = objp[i].reshape((3, 1)) + np.float32([square_size, -square_size, 0]).reshape(3, 1)
-                    elif i == width * (height - 1):
-                        print("-------------- bottom left corner --------------")
-                        objptl = objp[i].reshape((3, 1)) + np.float32([-square_size, square_size, 0]).reshape(3, 1)
-                    elif i == width * height - 1:
-                        print("-------------- bottom right corner --------------")
-                        objptl = objp[i].reshape((3, 1)) + np.float32([+square_size, square_size, 0]).reshape(3, 1)
-
-                    pt3 = rvecsM.dot(objptl) + tvecs
-                    print("This corner is from ", objptl.reshape((1, 3)), " to ", pt3.reshape((1, 3)))
-                    gtDist = np.linalg.norm(pt3)
-                    print("ground truth distance: ", gtDist)
-                    gtDistances.append(gtDist)
-
-                    pt2d, jac = cv2.projectPoints(
-                        pt3, np.identity(3), np.zeros((3, 1)), mtx, dist)
-                    print("projected corner coordinate: ", pt2d)  # 1 x 1 x 2 matrix
-
-                    # corners2: x, y!!! not row, col!!!
-                    tof = tofimg[int(pt2d[0][0][1]), int(pt2d[0][0][0])]
-                    print("tof image pixel value original: ", bin(tof))
-
-                    if ifDivide16:
-                        tof /= 16.0
-                    print("tof image pixel value: ", tof)
-                    tofs.append(tof)
-
+                # ret, gtDist, tof = expand_corners(i, width, height, objp, square_size,
+                #                              rvecsM, tvecs, mtx, dist, tofimg, ifDivide16)
+                # if ret:
+                #     gtDistances.append(gtDist)
+                #     tofs.append(tof)
 
                 print("-------------- corner ", i, " --------------")
                 pt3 = rvecsM.dot(objp[i].reshape((3, 1))) + tvecs
@@ -132,32 +218,48 @@ def calibrateDepth(square_size, mtx, dist, width=6, height=5,
                 gtDistances.append(gtDist)
 
                 print("2D Corner coordinate: ", corners2[i])
-                pt2d, jac = cv2.projectPoints(
+                pt2d, _ = cv2.projectPoints(
                     pt3, np.identity(3), np.zeros((3, 1)), mtx, dist)
                 print("projected corner coordinate: ", pt2d)
 
-                # corners2: x, y!!! not row, col!!!
-                tof = tofimg[int(corners2[i][0][1]), int(corners2[i][0][0])]
-                print("tof image pixel value original: ", bin(tof))
+                tofs.append(read_tof(tofimg, int(corners2[i][0][1]), int(
+                    corners2[i][0][0]), ifDivide16))
 
-                # # switch 2 channels: tof = tofc1 | tofc2
-                # tofc1 = tof >> 8
-                # tofc2 = (tof << 8) % (1 << 16)
-                # # tof = (((tof << 8) + (tof >> 8)) % (1 << 16)) >> 4
-                if ifDivide16:
-                    tof /= 16.0
-                print("tof image pixel value: ", tof)
-                tofs.append(tof)
+                if ifUseRGB and retRGB:
+                    print("stereo distance: ", stereo_dists[i])
+                    stereo_distances.append(stereo_dists[i])
 
                 if ifVisualization:
-                    imgMark = irimg.copy()
-                    imgpts, jac = cv2.projectPoints(
-                        objp[i]+axis, rvecs, tvecs, mtx, dist) # objp[i]: 3 vector
-                    imgMark = draw(imgMark, corners2[i], imgpts)
-                    cv2.imshow('imgMark', imgMark)
-                    cv2.waitKey(0)
+                    visual_tf(irimg, objp[i], axis, rvecs,
+                              tvecs, mtx, dist, corners2[i])
     cv2.destroyAllWindows()
-    return gtDistances, tofs
+    return gtDistances, tofs, stereo_distances
+
+
+def stereo_depth(M_rgb, d_rgb, M_ir, d_ir, R, T, corners_rgb, corners_tof):
+    """ projection matrix with distortion? """
+    P1 = np.append(M_rgb, np.zeros([3, 1]), 1)
+    # print('P1 is', P1)
+    transformation = np.append(R, T, 1)
+    P2 = M_ir.dot(transformation)
+    # print('P2 is', P2)
+
+    points4D = cv2.triangulatePoints(P1, P2, corners_rgb, corners_tof)
+    points4D /= points4D[3]
+    # print('4D points', points4D)
+
+    # points3D_tof = np.dot(P2, points4D) # P2=3*4 points4D=4*30 points3D_tpf=3*30
+    points3D_tof = transformation.dot(points4D)
+    # print(points3D_tof)
+    distances = np.linalg.norm(points3D_tof, axis=0)
+    # img_depth = cv2.imread('../data/calibration0716/1/DepthImage_0.png',-1)
+    # for i in range(len(corners_tof)):
+    #     corner = corners_tof[i][0]
+    #     x = int(corner[0])
+    #     y = int(corner[1])
+    #     print("corner %d (%d, %d) to (%d, %d, %d) stereo depth = %f" %
+    #           (i, x, y, points3D_tof[0][i], points3D_tof[1][i], points3D_tof[2][i], distances[i]))
+    return distances
 
 
 if __name__ == '__main__':
@@ -168,20 +270,24 @@ if __name__ == '__main__':
     rgbIntrinsic, rgbDist = load_coefficients('rgbCamera.yml')
     print("RGB Camera Intrinsic Matrix: ", rgbIntrinsic)
 
+    R, T = load_coefficients('./stereo.yml')
+
     square_size = 26.3571  # 13.1923  #26.3571
     width = 6  # 13 #6
     height = 5  # 6 #5
 
     allgtDistances = []
     alltofs = []
+    allstereo_distances = []
 
     dirpath = '../data/calibration0720/corner*'
-    gtDistances, tofs = calibrateDepth(square_size=square_size, mtx=irIntrinsic, dist=irDist,
-                                       irPrefix='Gray_', depthPrefix='DepthImage_',
+    gtDistances, tofs, stereo_distances = calibrateDepth(square_size=square_size, mtx=irIntrinsic, dist=irDist,
+                                       irPrefix='Gray_', depthPrefix='DepthImage_', rgbPrefix='RBG_',
                                        width=width, height=height, imgID='*', dirpath=dirpath,
-                                       ifVisualization=False, ifDivide16=True, ifUseRGB=False)
+                                       ifVisualization=False, ifDivide16=True, ifUseRGB=True)
     allgtDistances += gtDistances
     alltofs += tofs
+    allstereo_distances += stereo_distances
 
     # dirpath = '../data/parallelPlaneTocheckerboard/Plane50'
     # gtDistances, tofs = calibrateDepth(square_size=30, mtx=irIntrinsic, dist=irDist,
@@ -208,7 +314,9 @@ if __name__ == '__main__':
     # allgtDistances += gtDistances
     # alltofs += tofs
 
-    plt.plot(alltofs, allgtDistances, 'ro')
+    plt.plot(alltofs, allgtDistances, 'ro', label='gt vs. tof')
+    plt.plot(alltofs, allstereo_distances, 'yo', label='stereo vs. tof')
+
 
     A = np.vstack([alltofs, np.ones(len(alltofs))]).T
     m, c = np.linalg.lstsq(A, allgtDistances, rcond=None)[0]
