@@ -45,6 +45,10 @@ def calibrate(square_size, width=7, height=5, prefix='GrayImage_',
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
         objpoints, imgpoints, gray.shape[::-1], None, None)
 
+    print(mtx)
+    print('\n')
+    print(dist)
+
     return [ret, mtx, dist, rvecs, tvecs]
 
 

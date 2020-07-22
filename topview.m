@@ -17,12 +17,12 @@ D_undistort = undistortImage(D,irCameraParams);
 D_undistort = A.*D_undistort+B;
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
-pc_ir = tof2pc(D_denoise, C_ir);
+pc_ir = tof2pc_mat(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
 
-numplanes = 2; % fit 2 planes: top plane and ground
+numplanes = 4; % fit 2 planes: top plane and ground
 iterations = 100;
 subset_size = 3;
 
@@ -32,6 +32,7 @@ figure(ransac_figure);
 hold on
 plane_models = zeros(numplanes,4);
 plane_points{1,numplanes} = [];
+top_plane=1;
 for i = 1:numplanes
     inlier_thres = 10;
     if (i == 1) 
@@ -40,6 +41,14 @@ for i = 1:numplanes
     noise_ths = ones(1, length(pc)) * inlier_thres;
     [plane_models(i,:), outlier_ratio, plane_area, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
+    % find top plane
+    if i>1 && top_plane==1 % i=1 often is ground
+        n1=plane_models(1,1:3);
+        n2=plane_models(i,1:3);
+        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5 % parallel planes
+            top_plane=i;
+        end
+    end
     pc(best_inliers, :) = [];
     plane_points{i} = inliers;
     pcshow(inliers, [bitshift(bitand(i,4),-2) bitshift(bitand(i,2),-1) bitand(i,1)]);
@@ -52,11 +61,64 @@ zlabel('Z');
 hold off;
 
 %% find edge from depth image
-edge_thres = 0.1;
+% edge_thres = 0.01;
+% 
+% I = irCameraParams.Intrinsics;
+% % find region of interest
+% upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+% upper_pos = round(upper_pos);
+% upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
+% for i = 1:size(upper_pos, 1)
+%     if abs(upper_pos(i,1))>480 || abs(upper_pos(i,2))>640
+%         continue;
+%     end
+%     upper_2D(upper_pos(i,1), upper_pos(i,2)) = 1;
+% end
+% upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
+% upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
+% upper_2D_post = bwareaopen(upper_2D_post, 5000); % reject small objects
+% % find the rectangle that contain the upper plane
+% stats = regionprops(upper_2D_post);
+% enlarge_range = 15; % manually make the range larger
+% % notice BoundingBox =  [x y width height], but image is [col row], and col is reverse from y
+% row=stats.BoundingBox(1);
+% col=stats.BoundingBox(2);
+% w=stats.BoundingBox(3);
+% h=stats.BoundingBox(4);
+% col_min = round(col) - enlarge_range;
+% col_max = round(col + h) + enlarge_range;
+% row_min = round(row) - enlarge_range;
+% row_max = round(row + w) + enlarge_range;
+% if col_min<1
+%     col_min=1;
+% end
+% if col_max>480
+%     col_max=480;
+% end
+% if row_min<1
+%     row_min=1;
+% end
+% if row_max>640
+%     row_max=640;
+% end
+% 
+% D_smallPlane = D_denoise(col_min:col_max,row_min:row_max);
+% D_smallEdge = edge(D_smallPlane, 'Canny', edge_thres); % edge detection on the small portion of image
+% 
+% D_edge = zeros(size(D_denoise));
+% D_edge(col_min:col_max, row_min:row_max) = D_smallEdge;
+% 
+% upper_edge = bwareafilt(logical(D_edge),1); % always take out the biggest, somewhat brute force
+% edge_figure=image_counter;
+% figure(edge_figure);
+% image_counter = image_counter + 1;
+% imshow(upper_edge);
+% title("Edge of Upper plane");
 
-I = irCameraParams.Intrinsics;
+% Method1: directly fit edge on upper plane
+edge_thres = 0.1;
 % find region of interest
-upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
+upper_pos = worldToImage(irCameraParams,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
 upper_pos = round(upper_pos);
 upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
 for i = 1:size(upper_pos, 1)
@@ -66,34 +128,12 @@ for i = 1:size(upper_pos, 1)
     upper_2D(upper_pos(i,1), upper_pos(i,2)) = 1;
 end
 upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
-upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
-upper_2D_post = bwareaopen(upper_2D_post, 5000); % reject small objects
-% find the rectangle that contain the upper plane
-stats = regionprops(upper_2D_post);
-enlarge_range = 15; % manually make the range larger
-% notice BoundingBox =  [x y width height], but image is [col row], and col is reverse from y
-col_min = round(stats.BoundingBox(2)) - enlarge_range;
-col_max = round(stats.BoundingBox(2) + stats.BoundingBox(4)) + enlarge_range;
-row_min = round(stats.BoundingBox(1)) - enlarge_range;
-row_max = round(stats.BoundingBox(1) + stats.BoundingBox(3)) + enlarge_range;
-if col_min<1
-    col_min=1;
-end
-if col_max>480
-    col_max=480;
-end
-if row_min<1
-    row_min=1;
-end
-if row_max>640
-    row_max=640;
-end
-D_smallPlane = D_denoise(col_min:col_max, row_min:row_max);
-D_smallEdge = edge(D_smallPlane, 'Canny', edge_thres); % edge detection on the small portion of image
+upper_2D = imfill(upper_2D, 'holes'); % fill in the holes
+upper_2D = bwareaopen(upper_2D, 5000); % reject small objects
 
-D_edge = zeros(size(D_denoise));
-D_edge(col_min:col_max, row_min:row_max) = D_smallEdge;
-upper_edge = bwareafilt(logical(D_edge),1); % always take out the biggest, somewhat brute force
+% detect edge on 2d top plane
+upper_edge = edge(upper_2D, 'Canny', edge_thres); % edge detection on the small portion of image
+
 edge_figure=image_counter;
 figure(edge_figure);
 image_counter = image_counter + 1;
@@ -104,14 +144,14 @@ title("Edge of Upper plane");
 numlines = 4; % 4 edges of a rectangle
 
 [rows,cols]=find(upper_edge==true);
-edge_pts=[rows cols];
+edge_pts=[cols rows];
 line_2dmodels=zeros(numlines,2);
 k=1;
 figure(edge_figure);
 hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 150; % max allowable distance for inliers
+    maxDistance = 30; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -136,7 +176,7 @@ edge_3dmodels=zeros(numlines,6); % (1:3)=I,point on line % (4:6)=u,direction vec
 
 figure(ransac_figure);
 hold on;
-p1=plane_models(2,:); % top plane
+p1=plane_models(top_plane,:); % top plane
 n1=p1(1:3);
 M1=[0,0,-p1(4)./p1(3)];
 for i=1:numlines % assume 2 lines are of interest
