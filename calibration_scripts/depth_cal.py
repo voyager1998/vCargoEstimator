@@ -2,8 +2,10 @@ import numpy as np
 import cv2
 import glob
 import os
-from openCVcalibration import load_coefficients
 import matplotlib.pyplot as plt
+
+from openCVcalibration import *
+from test_stereo import *
 
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -115,8 +117,8 @@ def cv_dist(irimg, width, height, square_size, mtx, dist, ifVisualization=False)
             cvDistances.append(gtDist)
 
             # print("2D Corner coordinate: ", corners_ir[i])
-            pt2d, _ = cv2.projectPoints(
-                pt3, np.identity(3), np.zeros((3, 1)), mtx, dist)
+            # pt2d, _ = cv2.projectPoints(
+            #     pt3, np.identity(3), np.zeros((3, 1)), mtx, dist)
             # print("projected corner coordinate: ", pt2d)
 
             if ifVisualization:
@@ -177,6 +179,7 @@ def calibrateDepth(square_size, mtx, dist, width=6, height=5,
                         cornerimg, (width, height), cornersRGB2, retRGB)
                     cv2.imshow('chessboard RGB', cornerimg)
                     cv2.waitKey(0)
+                R, T = load_coefficients('./stereo.yml')
                 stereo_dists = stereo_depth(
                     rgbIntrinsic, rgbDist, mtx, dist, R, T, cornersRGB2, corners_ir)
                 for i in range(len(stereo_dists)):
@@ -187,32 +190,6 @@ def calibrateDepth(square_size, mtx, dist, width=6, height=5,
     return gtDistances, tofs, stereo_distances
 
 
-def stereo_depth(M_rgb, d_rgb, M_ir, d_ir, R, T, corners_rgb, corners_tof):
-    """ projection matrix with distortion? """
-    P1 = np.append(M_rgb, np.zeros([3, 1]), 1)
-    # print('P1 is', P1)
-    transformation = np.append(R, T, 1)
-    P2 = M_ir.dot(transformation)
-    # print('P2 is', P2)
-
-    points4D = cv2.triangulatePoints(P1, P2, corners_rgb, corners_tof)
-    points4D /= points4D[3]
-    # print('4D points', points4D)
-
-    # points3D_tof = np.dot(P2, points4D) # P2=3*4 points4D=4*30 points3D_tpf=3*30
-    points3D_tof = transformation.dot(points4D)
-    # print(points3D_tof)
-    distances = np.linalg.norm(points3D_tof, axis=0)
-    # img_depth = cv2.imread('../data/calibration0716/1/DepthImage_0.png',-1)
-    # for i in range(len(corners_tof)):
-    #     corner = corners_tof[i][0]
-    #     x = int(corner[0])
-    #     y = int(corner[1])
-    #     print("corner %d (%d, %d) to (%d, %d, %d) stereo depth = %f" %
-    #           (i, x, y, points3D_tof[0][i], points3D_tof[1][i], points3D_tof[2][i], distances[i]))
-    return distances
-
-
 if __name__ == '__main__':
     # Load previously saved data
     irIntrinsic, irDist = load_coefficients('irCamera.yml')
@@ -220,8 +197,6 @@ if __name__ == '__main__':
 
     rgbIntrinsic, rgbDist = load_coefficients('rgbCamera.yml')
     print("RGB Camera Intrinsic Matrix: ", rgbIntrinsic)
-
-    R, T = load_coefficients('./stereo.yml')
 
     square_size = 26.3571  # 13.1923  #26.3571
     width = 6  # 13 #6
