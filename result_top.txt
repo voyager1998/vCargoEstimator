@@ -1,0 +1,132 @@
+bias_method=0
+/data/top_view/DepthImage_0.png
+Length=286, Width=269, Height=156
+Error=-21.3
+
+/data/top_view/DepthImage_1.png
+Length=322, Width=290, Height=150
+Error=-8.0
+
+/data/top_view/DepthImage_2.png
+Length=276, Width=258, Height=162
+Error=-24.1
+
+/data/top_view/DepthImage_3.png
+Length=304, Width=287, Height=153
+Error=-12.8
+
+/data/top_view/DepthImage_4.png
+Length=285, Width=256, Height=159
+Error=-24.2
+
+/data/top_view/DepthImage_5.png
+Length=325, Width=1, Height=149
+Error=-99.6
+
+/data/top_view/DepthImage_6.png
+Length=290, Width=262, Height=157
+Error=-22.1
+
+/data/top_view/DepthImage_7.png
+Length=307, Width=289, Height=149
+Error=-13.4
+
+/data/top_view/DepthImage_8.png
+Length=245, Width=1, Height=161
+Error=-99.8
+
+/data/top_view/DepthImage_9.png
+Length=267, Width=244, Height=167
+Error=-28.8
+
+-----------------------
+
+
+bias_method=2
+/data/top_view/DepthImage_0.png
+Length=268, Width=244, Height=133
+Error=-43.0
+
+/data/top_view/DepthImage_1.png
+Length=297, Width=269, Height=127
+Error=-33.5
+
+/data/top_view/DepthImage_2.png
+Length=256, Width=238, Height=136
+Error=-45.5
+
+/data/top_view/DepthImage_3.png
+Length=285, Width=265, Height=129
+Error=-36.3
+
+/data/top_view/DepthImage_4.png
+Length=264, Width=237, Height=134
+Error=-45.0
+
+/data/top_view/DepthImage_5.png
+Length=300, Width=1, Height=126
+Error=-99.7
+
+/data/top_view/DepthImage_6.png
+Length=269, Width=242, Height=133
+Error=-43.5
+
+/data/top_view/DepthImage_7.png
+Length=284, Width=261, Height=126
+Error=-38.9
+
+/data/top_view/DepthImage_8.png
+Length=254, Width=232, Height=132
+Error=-49.2
+
+/data/top_view/DepthImage_9.png
+Length=242, Width=218, Height=140
+Error=-51.5
+
+-----------------------
+
+
+bias_method=1
+/data/top_view/DepthImage_0.png
+Length=324, Width=297, Height=157
+Error=-1.2
+
+/data/top_view/DepthImage_1.png
+Length=314, Width=296, Height=159
+Error=-3.2
+
+/data/top_view/DepthImage_2.png
+Length=325, Width=308, Height=156
+Error=2.6
+
+/data/top_view/DepthImage_3.png
+Length=316, Width=297, Height=157
+Error=-3.3
+
+/data/top_view/DepthImage_4.png
+Length=322, Width=306, Height=156
+Error=0.4
+
+/data/top_view/DepthImage_5.png
+Length=316, Width=293, Height=158
+Error=-4.1
+
+/data/top_view/DepthImage_6.png
+Length=320, Width=300, Height=157
+Error=-1.1
+
+/data/top_view/DepthImage_7.png
+Length=308, Width=301, Height=159
+Error=-3.2
+
+/data/top_view/DepthImage_8.png
+Length=310, Width=306, Height=158
+Error=-1.6
+
+/data/top_view/DepthImage_9.png
+Length=314, Width=311, Height=151
+Error=-3.8
+
+-----------------------
+
+

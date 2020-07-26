@@ -4,22 +4,23 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
-RGB = imread(strcat(pwd, '/data/data0618_1/RGBImage_0.png'));
+dir_path='/data/calibration0720/stereoCalibrationMain/1';
+RGB = imread(strcat(pwd, dir_path, '/RBG_0.png'));
 grayfromRGB = rgb2gray(RGB);
-load('calibration/rgbCameraParams0716.mat');
+load('calibration/panasonicRGBcameraParams.mat');
 C_rgb = rgbCameraParams.IntrinsicMatrix';
 rgb_undistort = undistortImage(grayfromRGB,rgbCameraParams);
 rgb_denoise= imbilatfilt(rgb_undistort, 1500, 5); % denoise
 
-D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
+D = imread(strcat(pwd, dir_path, '/DepthImage_0.png'));
 D = D/16;
-load('calibration/irCameraParams0716.mat');
+load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 D_undistort = undistortImage(D,irCameraParams);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 pc_ir = tof2pc_mat(D_denoise, C_ir);
 
-IR = imread(strcat(pwd, '/data/data0618_1/GrayImage_0.png'));
+IR = imread(strcat(pwd, dir_path, '/Gray_0.png'));
 IR_undistort = undistortImage(IR,irCameraParams);
 IR_denoise = imbilatfilt(IR_undistort, 1500, 5);
 
@@ -74,20 +75,22 @@ pcshow(ptcloud, uint8(color));
 % title("reproject 2d prom rgb camera's perspective");
 
 %% Rectify based on calibration
-load('calibration/stereo0718.mat');
-[RGBRect, IRRect] = rectifyStereoImages(imadjust(grayfromRGB),...
+load('calibration/stereoParams0718.mat');
+% load('calibration/panasonicStereoParams.mat')
+[RGBRect, IRRect] = rectifyStereoImages(imadjust(rgb_denoise),...
     imadjust(IR_denoise), stereoParams, 'OutputView','full');
-figure(image_counter);
-image_counter = image_counter + 1;
-imagesc(RGBRect)
-set(gca,'dataAspectRatio',[1 1 1])
-title('grayfromRGB Rectified')
 
-figure(image_counter);
-image_counter = image_counter + 1;
-imagesc(IRRect)
-set(gca,'dataAspectRatio',[1 1 1])
-title('IR Rectified')
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% imagesc(RGBRect)
+% set(gca,'dataAspectRatio',[1 1 1])
+% title('grayfromRGB Rectified')
+
+% figure(image_counter);
+% image_counter = image_counter + 1;
+% imagesc(IRRect)
+% set(gca,'dataAspectRatio',[1 1 1])
+% title('IR Rectified')
 
 figure(image_counter);
 image_counter = image_counter + 1;
@@ -96,10 +99,12 @@ set(gca,'dataAspectRatio',[1 1 1])
 title('Rectified Frames');
 
 %% Compute Disparity
-disparityMap = disparitySGM(RGBRect, IRRect);
+disparityRange = [0 128];
+disparityMap = disparityBM(RGBRect,IRRect,'DisparityRange',disparityRange,'UniquenessThreshold',20);
+% disparityMap = disparitySGM(RGBRect, IRRect);
 figure(image_counter);
 image_counter = image_counter + 1;
-imagesc(disparityMap, [0, 64]);
+imagesc(disparityMap, disparityRange);
 title('Disparity Map');
 colormap jet
 colorbar
