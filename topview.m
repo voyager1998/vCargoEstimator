@@ -22,7 +22,7 @@ pc_ir = tof2pc_mat(D_denoise, C_ir);
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
 
-numplanes = 4; % fit 2 planes: top plane and ground
+numplanes = 2; % fit 2 planes: top plane and ground
 iterations = 100;
 subset_size = 3;
 
@@ -34,7 +34,7 @@ plane_models = zeros(numplanes,4);
 plane_points{1,numplanes} = [];
 top_plane=1;
 for i = 1:numplanes
-    inlier_thres = 10;
+    e = 10;
     if (i == 1) 
         inlier_thres = 30;
     end
