@@ -20,14 +20,14 @@ end_header
 '''
 
 class StereoCalibration(object):
-    def __init__(self, filepath, height=5, width=6):
+    def __init__(self, filepath,square_size, height, width):
         # termination criteria
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         self.criteria_cal = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 1e-5)
 
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
         self.objp = np.zeros((height*width, 3), np.float32)
-        self.objp[:, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2)
+        self.objp[:, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2) * square_size
 
         # Arrays to store object points and image points from all the images.
         self.objpoints = []  # 3d point in real world space
@@ -81,8 +81,8 @@ class StereoCalibration(object):
 
     def read_images(self, filepath, width, height):
         print('\nStart reading images...')
-        images_rgb = glob.glob(filepath + '/rgb2/*.png')
-        images_tof = glob.glob(filepath + '/ir2/*.png')
+        images_rgb = glob.glob(filepath + '/rgb/*.png')
+        images_tof = glob.glob(filepath + '/ir/*.png')
         images_rgb.sort()
         images_tof.sort()
 
@@ -285,5 +285,8 @@ class StereoCalibration(object):
 
 
 if __name__ == '__main__':
-    filepath = '../data/calibration0720/stereoCalibrationMain' # contain two folders "rgb" and "tof"
-    cal_data = StereoCalibration(filepath)
+    filepath = '../data/calibration0725/1' # contain two folders "rgb" and "tof"
+    square_size = 26.3571
+    height = 5
+    width = 6
+    cal_data = StereoCalibration(filepath,square_size,height,width)
