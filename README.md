@@ -25,3 +25,17 @@ System parameter requirements:
 
 ## Notes
 1. ColorSpec (Color Specification) https://www.mathworks.com/help/matlab/ref/colorspec.html
+
+## Calibration Files
+
+### Panasonic
+`panasonic*.mat` represents calibration files provided by Panasonic.
+
+### Our calibration results
+IR intrinsic matrix: `irCameraParams0716.mat`
+
+RGB intrinsic matrix: `rgbCameraParams0716.mat`
+
+Extrinsic matrix (Camera 1: RGB; Camera 2: IR): 
+
+`stereoParams0718.mat`: calibrated using `irCameraParams0716.mat`, `rgbCameraParams0716.mat`, and `calibration0712/plane50`
