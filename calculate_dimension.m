@@ -204,7 +204,7 @@ hold off;
 
 %% Calculate height/length/width
 h = plane_dist(plane_models(1,:), plane_models(top_plane,:), plane_points{1}, plane_points{top_plane});
-
+% h = Cal_h(plane_points{1}, plane_points{top_plane}, plane_models(1,:), plane_models(top_plane,:));
 corners=zeros(numlines.*(numlines-1),3);
 c=1;
 
@@ -238,8 +238,10 @@ for i=1:c-1
         k=k+1;
     end
 end
-l=(median(distances(1:3))+median(distances(4:6)))/2;
-w=(min(distances(1:3))+min(distances(4:6)))/2;
+% l=(median(distances(1:3))+median(distances(4:6)))/2;
+% w=(min(distances(1:3))+min(distances(4:6)))/2;
+l=max(median(distances(1:3)),median(distances(4:6)));
+w=max(min(distances(1:3)),min(distances(4:6)));
 dimension=[h l w];
 img_counter=image_counter;
 end

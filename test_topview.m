@@ -10,7 +10,7 @@ fileID = fopen(['result_' test_view '.txt'],'a');
 
 if test_view==1
     true=[160 318 300];
-    numpics=10; % 14 in total
+    numpics=8; % 14 in total
     fileID = fopen('result_top.txt','a');
     prefix='/data/top_view';
 elseif test_view==2
@@ -24,12 +24,12 @@ results=zeros(numpics,3);
 k=1;
 
 %% Choose bias method
-bias_method=1; % 0=without bias process; 1=pixel-wise; 2=linear-bias
+bias_method=0; % 0=without bias process; 1=pixel-wise; 2=linear-bias
 fprintf(fileID,'bias_method=%d\n',bias_method);
 
 %% Calculate
 for idx=1:numpics
-    filename=[prefix '/DepthImage_' num2str(idx-1,'%d'), '.png'];
+    filename=[prefix '/DepthImage_' num2str(idx+4,'%d'), '.png'];
     D = imread(strcat(pwd, filename));
     fprintf(fileID,filename);
     fprintf(fileID,'\n');

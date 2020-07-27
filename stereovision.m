@@ -4,7 +4,7 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
-dir_path='/data/calibration0720/stereoCalibrationMain/1';
+dir_path='/data/calibration0725/boxA';
 RGB = imread(strcat(pwd, dir_path, '/RBG_0.png'));
 grayfromRGB = rgb2gray(RGB);
 load('calibration/panasonicRGBcameraParams.mat');
@@ -23,6 +23,18 @@ pc_ir = tof2pc_mat(D_denoise, C_ir);
 IR = imread(strcat(pwd, dir_path, '/Gray_0.png'));
 IR_undistort = undistortImage(IR,irCameraParams);
 IR_denoise = imbilatfilt(IR_undistort, 1500, 5);
+
+%% depth based on feature detection
+% I1 = rgb2gray(imread(strcat(pwd, dir_path, '/RBG_10.png')));
+% I2 = rgb2gray(imread(strcat(pwd, dir_path, '/RBG_13.png')));
+% points1 = detectHarrisFeatures(I1);
+% points2 = detectHarrisFeatures(I2);
+% [features1,valid_points1] = extractFeatures(I1,points1);
+% [features2,valid_points2] = extractFeatures(I2,points2);
+% indexPairs = matchFeatures(features1,features2);
+% matchedPoints1 = valid_points1(indexPairs(:,1),:);
+% matchedPoints2 = valid_points2(indexPairs(:,2),:);
+% figure; showMatchedFeatures(I1,I2,matchedPoints1,matchedPoints2);
 
 %% Alignment in 3d
 load('calibration/stereo0718.mat');

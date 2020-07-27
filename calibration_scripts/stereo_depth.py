@@ -33,6 +33,8 @@ def cal_depth():
         print("corner %d (%d, %d) to (%d, %d, %d) tof depth = %f stereo depth = %f" % 
             (i, x, y, points3D_tof[0][i], points3D_tof[1][i], points3D_tof[2][i], img_depth[y][x], distances[i]))
 
+
+# find corners in chessboard
 def find_corners():
     width = 6
     height = 5
@@ -67,5 +69,31 @@ def find_corners():
     return [corners_rgb, corners_tof]
 
 
+# find four corners of a box
+def find_box_corners():
+    img_rgb = cv2.imread('../data/calibration0725/boxA/RBG_0.png')
+    gray_rgb = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+    plane_rgb = np.zeros((480, 640), np.float32)
+    roi_rgb = gray_rgb[40:70,25:50]
+    cv2.imshow('rgb_roi', roi_rgb)
+    features1 = cv2.cornerHarris(roi_rgb,2,3,0.04)
+    plane_rgb[40:70,25:50] = features1
+    img_rgb[plane_rgb>0.9*plane_rgb.max()]=[0,0,255]
+    cv2.imshow('rgb',img_rgb)
+
+    img_tof = cv2.imread('../data/calibration0725/boxA/Gray_0.png')
+    gray_tof = cv2.cvtColor(img_tof, cv2.COLOR_BGR2GRAY)
+    plane_tof = np.zeros((480, 640), np.float32)
+    roi_tof = gray_tof[140:180,150:170]
+    cv2.imshow('tof_roi', roi_tof)
+    features2 = cv2.cornerHarris(roi_tof,2,3,0.04)
+    plane_tof[140:180,150:170] = features2
+    img_tof[plane_tof>0.5*plane_tof.max()]=[0,0,255]
+    cv2.imshow('tof', img_tof)
+
+    cv2.waitKey(0)
+    # return [corners_rgb, corners, tof]
+
+
 if __name__ == '__main__':
-    cal_depth()
+    find_box_corners()

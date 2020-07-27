@@ -207,8 +207,8 @@ class StereoCalibration(object):
         print('\nStart compute depth for a stereo pair...')
         # img_rgb = cv2.imread('../data/data0618_1/RGBImage_0.png')
         # img_tof = cv2.imread('../data/data0618_1/GrayImage_0.png')
-        img_rgb = cv2.imread('../data/calibration0720/boxA-still/RBG_5.png')
-        img_tof = cv2.imread('../data/calibration0720/boxA-still/Gray_5.png')
+        img_rgb = cv2.imread('../data/calibration0725/boxA/RBG_25.png')
+        img_tof = cv2.imread('../data/calibration0725/boxA/Gray_25.png')
         # Rectify the images on rotation and alignement
         Left_nice = cv2.remap(img_rgb,leftMap[0],leftMap[1], cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
         Right_nice = cv2.remap(img_tof,rightMap[0],rightMap[1], cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
