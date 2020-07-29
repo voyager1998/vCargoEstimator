@@ -1,0 +1,294 @@
+bias_method=2
+bias_method=2
+/data/calibration0725/boxA/DepthImage_0.png
+Length=319, Width=306, Height=161
+Error=5.2
+
+/data/calibration0725/boxA/DepthImage_1.png
+Length=312, Width=299, Height=159
+Error=-0.0
+
+/data/calibration0725/boxA/DepthImage_2.png
+Length=316, Width=312, Height=160
+Error=5.9
+
+/data/calibration0725/boxA/DepthImage_3.png
+Length=309, Width=307, Height=159
+Error=1.4
+
+/data/calibration0725/boxA/DepthImage_4.png
+Length=320, Width=310, Height=160
+Error=6.4
+
+/data/calibration0725/boxA/DepthImage_5.png
+Length=314, Width=311, Height=159
+Error=4.4
+
+/data/calibration0725/boxA/DepthImage_6.png
+Length=316, Width=302, Height=159
+Error=2.1
+
+/data/calibration0725/boxA/DepthImage_7.png
+Length=321, Width=306, Height=160
+Error=5.4
+
+/data/calibration0725/boxA/DepthImage_8.png
+Length=307, Width=299, Height=160
+Error=-1.5
+
+/data/calibration0725/boxA/DepthImage_9.png
+Length=319, Width=309, Height=159
+Error=5.3
+
+/data/calibration0725/boxA/DepthImage_10.png
+Length=311, Width=304, Height=159
+Error=1.3
+
+/data/calibration0725/boxA/DepthImage_11.png
+Length=308, Width=297, Height=159
+Error=-2.5
+
+/data/calibration0725/boxA/DepthImage_12.png
+Length=307, Width=301, Height=159
+Error=-1.2
+
+/data/calibration0725/boxA/DepthImage_13.png
+Length=311, Width=305, Height=159
+Error=1.5
+
+/data/calibration0725/boxA/DepthImage_14.png
+Length=316, Width=311, Height=159
+Error=4.9
+
+/data/calibration0725/boxA/DepthImage_15.png
+Length=313, Width=301, Height=159
+Error=0.6
+
+/data/calibration0725/boxA/DepthImage_16.png
+Length=314, Width=280, Height=159
+Error=-6.2
+
+/data/calibration0725/boxA/DepthImage_17.png
+Length=316, Width=301, Height=159
+Error=1.6
+
+/data/calibration0725/boxA/DepthImage_18.png
+Length=309, Width=281, Height=160
+Error=-7.0
+
+/data/calibration0725/boxA/DepthImage_19.png
+Length=324, Width=297, Height=159
+Error=3.2
+
+/data/calibration0725/boxA/DepthImage_20.png
+Length=315, Width=303, Height=159
+Error=1.6
+
+/data/calibration0725/boxA/DepthImage_21.png
+Length=306, Width=271, Height=159
+Error=-11.5
+
+/data/calibration0725/boxA/DepthImage_22.png
+Length=308, Width=278, Height=160
+Error=-7.9
+
+/data/calibration0725/boxA/DepthImage_23.png
+Length=311, Width=284, Height=159
+Error=-5.7
+
+/data/calibration0725/boxA/DepthImage_24.png
+Length=309, Width=283, Height=159
+Error=-6.6
+
+/data/calibration0725/boxA/DepthImage_25.png
+Length=306, Width=284, Height=159
+Error=-7.3
+
+/data/calibration0725/boxA/DepthImage_26.png
+Length=300, Width=283, Height=160
+Error=-8.7
+
+/data/calibration0725/boxA/DepthImage_27.png
+Length=304, Width=279, Height=159
+Error=-9.2
+
+/data/calibration0725/boxA/DepthImage_28.png
+Length=300, Width=278, Height=160
+Error=-10.6
+
+/data/calibration0725/boxA/DepthImage_29.png
+Length=305, Width=278, Height=159
+Error=-9.2
+
+/data/calibration0725/boxA/DepthImage_30.png
+Length=301, Width=273, Height=159
+Error=-12.2
+
+/data/calibration0725/boxA/DepthImage_31.png
+Length=698, Width=306, Height=160
+Error=130.4
+
+/data/calibration0725/boxA/DepthImage_32.png
+Length=688, Width=303, Height=160
+Error=123.9
+
+/data/calibration0725/boxA/DepthImage_33.png
+Length=690, Width=306, Height=160
+Error=127.6
+
+/data/calibration0725/boxA/DepthImage_34.png
+Length=696, Width=308, Height=159
+Error=129.1
+
+/data/calibration0725/boxA/DepthImage_35.png
+Length=701, Width=306, Height=160
+Error=130.4
+
+/data/calibration0725/boxA/DepthImage_36.png
+Length=295, Width=273, Height=161
+Error=-13.1
+
+/data/calibration0725/boxA/DepthImage_37.png
+Length=291, Width=276, Height=161
+Error=-13.2
+
+/data/calibration0725/boxA/DepthImage_38.png
+Length=292, Width=274, Height=160
+Error=-13.8
+
+/data/calibration0725/boxA/DepthImage_39.png
+Length=294, Width=271, Height=160
+Error=-14.0
+
+/data/calibration0725/boxA/DepthImage_40.png
+Length=298, Width=272, Height=161
+Error=-12.4
+
+/data/calibration0725/boxA/DepthImage_41.png
+Length=302, Width=297, Height=163
+Error=-1.7
+
+/data/calibration0725/boxA/DepthImage_42.png
+Length=311, Width=297, Height=163
+Error=1.4
+
+/data/calibration0725/boxA/DepthImage_43.png
+Length=305, Width=293, Height=163
+Error=-1.7
+
+/data/calibration0725/boxA/DepthImage_44.png
+Length=308, Width=297, Height=163
+Error=-0.0
+
+/data/calibration0725/boxA/DepthImage_45.png
+Length=313, Width=301, Height=163
+Error=3.1
+
+/data/calibration0725/boxA/DepthImage_46.png
+Length=316, Width=296, Height=156
+Error=-1.8
+
+/data/calibration0725/boxA/DepthImage_47.png
+Length=308, Width=296, Height=156
+Error=-4.3
+
+/data/calibration0725/boxA/DepthImage_48.png
+Length=323, Width=294, Height=157
+Error=-0.1
+
+/data/calibration0725/boxA/DepthImage_49.png
+Length=311, Width=295, Height=156
+Error=-3.5
+
+/data/calibration0725/boxA/DepthImage_50.png
+Length=319, Width=291, Height=156
+Error=-2.6
+
+/data/calibration0725/boxA/DepthImage_51.png
+Length=299, Width=283, Height=157
+Error=-11.3
+
+/data/calibration0725/boxA/DepthImage_52.png
+Length=305, Width=279, Height=156
+Error=-10.5
+
+/data/calibration0725/boxA/DepthImage_53.png
+Length=310, Width=279, Height=157
+Error=-8.7
+
+/data/calibration0725/boxA/DepthImage_54.png
+Length=306, Width=282, Height=156
+Error=-9.7
+
+/data/calibration0725/boxA/DepthImage_55.png
+Length=307, Width=278, Height=156
+Error=-10.3
+
+/data/calibration0725/boxA/DepthImage_56.png
+Length=308, Width=278, Height=156
+Error=-10.0
+
+/data/calibration0725/boxA/DepthImage_57.png
+Length=306, Width=278, Height=156
+Error=-11.1
+
+/data/calibration0725/boxA/DepthImage_58.png
+Length=302, Width=275, Height=157
+Error=-12.7
+
+/data/calibration0725/boxA/DepthImage_59.png
+Length=310, Width=273, Height=157
+Error=-10.8
+
+/data/calibration0725/boxA/DepthImage_60.png
+Length=301, Width=273, Height=157
+Error=-13.3
+
+bias_method=2
+/data/calibration0725/boxA/DepthImage_0.png
+Length=313, Width=307, Height=160
+Error=3.2
+
+/data/calibration0725/boxA/DepthImage_1.png
+Length=312, Width=299, Height=159
+Error=-0.1
+
+/data/calibration0725/boxA/DepthImage_2.png
+Length=309, Width=305, Height=160
+Error=1.4
+
+/data/calibration0725/boxA/DepthImage_3.png
+Length=317, Width=299, Height=159
+Error=1.2
+
+/data/calibration0725/boxA/DepthImage_4.png
+Length=312, Width=302, Height=159
+Error=0.9
+
+/data/calibration0725/boxA/DepthImage_5.png
+Length=323, Width=313, Height=159
+Error=8.0
+
+/data/calibration0725/boxA/DepthImage_6.png
+Length=314, Width=304, Height=160
+Error=2.4
+
+/data/calibration0725/boxA/DepthImage_7.png
+Length=313, Width=307, Height=159
+Error=3.1
+
+/data/calibration0725/boxA/DepthImage_8.png
+Length=309, Width=301, Height=160
+Error=0.0
+
+/data/calibration0725/boxA/DepthImage_9.png
+Length=328, Width=313, Height=159
+Error=9.8
+
+/data/calibration0725/boxA/DepthImage_10.png
+Length=305, Width=304, Height=159
+Error=-0.8
+
+-----------------------
+
+

@@ -4,17 +4,33 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
+% select box to use
+box=1; % 1 for boxA, 2 for boxB, 3 for boxC
+if box==1
+    trueDimension=[158.75,316, 296.75];
+    box_name='boxA';
+elseif box==2
+    trueDimension=[275.15, 430.25, 307];
+    box_name='boxB';
+elseif box==3
+    trueDimension=[109.5, 283.5, 177.5];
+    box_name='boxC';
+else
+    error('Error: Please use correct box.\n');
+end
+
 % D must be a top view
-D = imread(strcat(pwd, '/data/fix/fix80/DepthImage_1.png'));
+D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
+% D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
 % eliminate bias
-load('bias_pixelwise.mat'); % bias transformation calculated from bias_cancellation.m 
+bias=load('bias_linear.mat').p; % bias transformation calculated from bias_cancellation.m 
 D=double(D);
 D = D/16;
 D_undistort = undistortImage(D,irCameraParams);
-D_undistort = A.*D_undistort+B;
+D_undistort = bias(1).*D_undistort+bias(2);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
 pc_ir = tof2pc_mat(D_denoise, C_ir);
@@ -151,7 +167,7 @@ figure(edge_figure);
 hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 30; % max allowable distance for inliers
+    maxDistance = 50; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -193,9 +209,13 @@ for i=1:numlines % assume 2 lines are of interest
 end
 hold off;
 
-%% Calculate height/length/width
-h = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+%% Calculate height/length/width - Method1 using corners
+fprintf('***Groundth truth***\nLength=%.0f, Width=%.0f, Height=%.0f\n',trueDimension(2),trueDimension(3),trueDimension(1));
 
+% h = plane_dist(plane_models(1,:), plane_models(2,:), plane_points{1}, plane_points{2});
+h = Cal_h(plane_points{1}, plane_points{top_plane}, plane_models(1,:), plane_models(top_plane,:));
+
+fprintf('***Using corners***\n');
 corners=zeros(numlines.*(numlines-1),3);
 c=1;
 
@@ -226,6 +246,7 @@ k=1;
 for i=1:c-1
     for j=i+1:c
         distances(k)=norm(corners(i,:)-corners(j,:));
+        fprintf('dist%d=%.1f\n',k,distances(k));
         k=k+1;
     end
 end
@@ -235,7 +256,62 @@ dimension=[h l w];
 fprintf('Length=%.0f, Width=%.0f, Height=%.0f\n',dimension(2),dimension(3),dimension(1));
 vol=dimension(2)*dimension(3)*dimension(1);
 fprintf('Vol=%.0f mm^3\n', vol);
-trueV=160*318*300;
+trueV = trueDimension(1)*trueDimension(2)*trueDimension(3);
 error=(vol-trueV)/trueV;
 fprintf('Error=%.1f\n',error*100);
 
+%% project top-plane points on edge -  - Method2 using projection
+fprintf('***Using projection***\n');
+figure(ransac_figure);
+hold on
+sample_points=500;
+distances=zeros(4,1);
+for j=1:4
+    I = edge_3dmodels(j,1:3); % point on line
+    u = edge_3dmodels(j,4:6); % direction vector of line
+
+    total_points = size(plane_points{top_plane});
+    projections=zeros(sample_points,3);
+    dists=zeros(sample_points,1);
+    k=1;
+    for i=1:floor(total_points/sample_points):total_points
+        P = plane_points{2}(i,:); % one point on the top plane
+        v = P-I;
+        projection = dot(u,v);
+        Q = I+projection*u; % projected point of P on the line
+        projections(k,:)=Q;
+        dists(k)=projection;
+        k=k+1;
+        % plot3(P(1),P(2),P(3),'r.','MarkerSize',50)
+        plot3(Q(1),Q(2),Q(3),'r.','MarkerSize',10)
+    end
+    syms t % for plotting line
+    t=-500:500;
+    line = I'+t.*(u'/norm(u'));
+    plot3(line(1,:),line(2,:),line(3,:),'.','Color','white')
+    
+    num=floor(sample_points/(max(dists)-min(dists)));
+    dists=sort(dists);
+    idx_min=1;
+%     while (dists(idx_min+3)-dists(idx_min) > 1 || dists(idx_min+4)-dists(idx_min+1) > 1 || dists(idx_min+5)-dists(idx_min+2) > 1)
+    while (dists(idx_min+num)-dists(idx_min)>1)
+        idx_min=idx_min+1;
+    end
+    idx_max=size(dists,1);
+%     while (dists(idx_max)-dists(idx_max-3) > 1 || dists(idx_max-1)-dists(idx_max-4) > 1 || dists(idx_max-2)-dists(idx_max-5) > 1)
+    while (dists(idx_max)-dists(idx_max-num)>1)
+        idx_max=idx_max-1;
+    end
+    dist=dists(idx_max)-dists(idx_min);
+    distances(j)=dist;
+    fprintf('dist%d=%.1f\n',j,dist);
+end
+distances=sort(distances);
+width=(distances(1)+distances(2))/2;
+length=(distances(3)+distances(4))/2;
+dimension=[h length width];
+fprintf('Length=%.0f, Width=%.0f, Height=%.0f\n',dimension(2),dimension(3),dimension(1));
+vol=dimension(2)*dimension(3)*dimension(1);
+fprintf('Vol=%.0f mm^3\n', vol);
+error=(vol-trueV)/trueV;
+fprintf('Error=%.1f\n',error*100);
