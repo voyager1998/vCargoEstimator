@@ -21,12 +21,10 @@ D = double(D);
 D = D/16;
 D = undistortImage(D,irCameraParams);
 % eliminate bias
-if bias_method==1
-    % Method1: pixel wise bias
+if bias_method==1 % Method1: pixel wise bias
     bias=load('bias_pixelwise.mat');
     D = bias.A.*D + bias.B;
-elseif bias_method==2
-    % Method2: linear bias calculated from bias_cancellation.m
+elseif bias_method==2 % Method2: linear bias
     bias=load('bias_linear.mat').p;
     D=polyval(bias,D);
 end
@@ -35,7 +33,7 @@ D_denoise = imbilatfilt(D, 1500, 5);
 pc_ir = tof2pc_mat(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
-numplanes = 4; % fit 2 planes: top plane and ground
+numplanes = 2; % topview fit 2 planes
 
 iterations = 100;
 subset_size = 3;
@@ -74,55 +72,8 @@ xlabel('X');
 ylabel('Y');
 zlabel('Z');
 hold off;
-%% project 3d top plane back to binary 2d
-% Method2: find region of interest and fit edge on original depth image
-% edge_thres = 0.1;
 
-% % find region of interest
-% upper_pos = worldToImage(irCameraParams,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
-% upper_pos = round(upper_pos);
-% upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
-% for i = 1:size(upper_pos, 1)
-%     if abs(upper_pos(i,1))>480 || abs(upper_pos(i,2))>640
-%         continue;
-%     end
-%     upper_2D(upper_pos(i,1), upper_pos(i,2)) = 1;
-% end
-% upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
-% upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
-% upper_2D_post = bwareaopen(upper_2D_post, 5000); % reject small objects
-% % find the rectangle that contain the upper plane
-% stats = regionprops(upper_2D_post);
-% enlarge_range = 15; % manually make the range larger
-% % notice BoundingBox =  [x y width height], but image is [col row], and col is reverse from y
-% col_min = round(stats.BoundingBox(2)) - enlarge_range;
-% col_max = round(stats.BoundingBox(2) + stats.BoundingBox(4)) + enlarge_range;
-% row_min = round(stats.BoundingBox(1)) - enlarge_range;
-% row_max = round(stats.BoundingBox(1) + stats.BoundingBox(3)) + enlarge_range;
-% if col_min<1
-%     col_min=1;
-% end
-% if col_max>480
-%     col_max=480;
-% end
-% if row_min<1
-%     row_min=1;
-% end
-% if row_max>640
-%     row_max=640;
-% end
-% D_smallPlane = D_denoise(col_min:col_max, row_min:row_max);
-% D_smallEdge = edge(D_smallPlane, 'Canny', edge_thres); % edge detection on the small portion of image
-% 
-% D_edge = zeros(size(D_denoise));
-% D_edge(col_min:col_max, row_min:row_max) = D_smallEdge;
-% upper_edge = bwareafilt(logical(D_edge),1); % always take out the biggest, somewhat brute force
-% edge_figure=image_counter;
-% figure(edge_figure);
-% image_counter = image_counter + 1;
-% imshow(upper_edge);
-
-% Method1: directly fit edge on upper plane
+%% Find edges - method1: directly fit edge on upper plane
 edge_thres = 0.1;
 % find region of interest
 upper_pos = worldToImage(irCameraParams,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
@@ -203,45 +154,57 @@ end
 hold off;
 
 %% Calculate height/length/width
-h = plane_dist(plane_models(1,:), plane_models(top_plane,:), plane_points{1}, plane_points{top_plane});
-% h = Cal_h(plane_points{1}, plane_points{top_plane}, plane_models(1,:), plane_models(top_plane,:));
-corners=zeros(numlines.*(numlines-1),3);
-c=1;
+% h = plane_dist(plane_models(1,:), plane_models(top_plane,:), plane_points{1}, plane_points{top_plane});
+h = Cal_h(plane_points{1}, plane_points{top_plane}, plane_models(1,:), plane_models(top_plane,:));
 
-for i=1:numlines-1
-    for j=i+1:numlines
-        syms k1 k2
-        p1=edge_3dmodels(i,1:3)';
-        u1=edge_3dmodels(i,4:6)';
-        p2=edge_3dmodels(j,1:3)';
-        u2=edge_3dmodels(j,4:6)';
-        if (abs(dot(u1,u2))<0.5) % perpendicular lines
-            ekv1 = k1 - k2*dot(u1,u2) == dot(u1,p2-p1);
-            ekv2 = k1*dot(u1,u2) - k2 == dot(u2,p2-p1);
-            ret=solve([ekv1,ekv2]);
+%% project top-plane points on edge -  - Method2 using projection
+figure(ransac_figure);
+hold on
+sample_points=500;
+distances=zeros(4,1);
+for j=1:4
+    I = edge_3dmodels(j,1:3); % point on line
+    u = edge_3dmodels(j,4:6); % direction vector of line
 
-            k1=ret.k1;
-            k2=ret.k2;
-            intercept1=p1+k1*u1;
-            intercept1=double(intercept1);
-            corners(c,:)=intercept1';
-            c=c+1;
-        end
-    end
-end
-c=c-1;
-distances=zeros(6,1);
-k=1;
-for i=1:c-1
-    for j=i+1:c
-        distances(k)=norm(corners(i,:)-corners(j,:));
+    total_points = size(plane_points{top_plane});
+    projections=zeros(sample_points,3);
+    dists=zeros(sample_points,1);
+    k=1;
+    for i=1:floor(total_points/sample_points):total_points
+        P = plane_points{2}(i,:); % one point on the top plane
+        v = P-I;
+        projection = dot(u,v);
+        Q = I+projection*u; % projected point of P on the line
+        projections(k,:)=Q;
+        dists(k)=projection;
         k=k+1;
+        % plot3(P(1),P(2),P(3),'r.','MarkerSize',50)
+        plot3(Q(1),Q(2),Q(3),'r.','MarkerSize',10)
     end
+    syms t % for plotting line
+    t=-500:500;
+    line = I'+t.*(u'/norm(u'));
+    plot3(line(1,:),line(2,:),line(3,:),'.','Color','white')
+    
+    num=floor(sample_points/(max(dists)-min(dists)));
+    dists=sort(dists);
+    idx_min=1;
+%     while (dists(idx_min+3)-dists(idx_min) > 1 || dists(idx_min+4)-dists(idx_min+1) > 1 || dists(idx_min+5)-dists(idx_min+2) > 1)
+    while (dists(idx_min+num)-dists(idx_min)>1)
+        idx_min=idx_min+1;
+    end
+    idx_max=size(dists,1);
+%     while (dists(idx_max)-dists(idx_max-3) > 1 || dists(idx_max-1)-dists(idx_max-4) > 1 || dists(idx_max-2)-dists(idx_max-5) > 1)
+    while (dists(idx_max)-dists(idx_max-num)>1)
+        idx_max=idx_max-1;
+    end
+    dist=dists(idx_max)-dists(idx_min);
+    distances(j)=dist;
+    fprintf('dist%d=%.1f\n',j,dist);
 end
-% l=(median(distances(1:3))+median(distances(4:6)))/2;
-% w=(min(distances(1:3))+min(distances(4:6)))/2;
-l=max(median(distances(1:3)),median(distances(4:6)));
-w=max(min(distances(1:3)),min(distances(4:6)));
+distances=sort(distances);
+w=(distances(1)+distances(2))/2;
+l=(distances(3)+distances(4))/2;
 dimension=[h l w];
 img_counter=image_counter;
 end

@@ -4,32 +4,39 @@ image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 
-%% choose dataset
-test_view=1; % 1 for top; 2 for side
-fileID = fopen(['result_' test_view '.txt'],'a');
-
-if test_view==1
-    true=[160 318 300];
-    numpics=8; % 14 in total
-    fileID = fopen('result_top.txt','a');
-    prefix='/data/top_view';
-elseif test_view==2
-    true=[281 433 311];
-    numpics=9;
-    fileID = fopen('result_side.txt','a');
-    prefix='/data/side_view';
+% select box to use
+box=1; % 1=boxA, 2=boxB, 3=boxC
+if box==1
+    true=[158.75,316, 296.75];
+    box_name='boxA';
+    numpics=10;
+    offset=0;
+elseif box==2
+    true=[275.15, 430.25, 307];
+    box_name='boxB';
+    offset=81;
+    numpics=20;
+elseif box==3
+    true=[109.5, 283.5, 177.5];
+    box_name='boxC';
+    offset=61;
+    numpics=20;
+else
+    error('Error: Please use correct box.\n');
 end
 trueV=true(1)*true(2)*true(3);
-results=zeros(numpics,3);
-k=1;
 
-%% Choose bias method
-bias_method=0; % 0=without bias process; 1=pixel-wise; 2=linear-bias
+prefix = '/data/calibration0725/';
+fileID = fopen(['result_' box_name '.txt'],'a'); % write results to file
+% Choose bias method
+bias_method=2; % 1=pixel-wise; 2=linear
 fprintf(fileID,'bias_method=%d\n',bias_method);
 
 %% Calculate
-for idx=1:numpics
-    filename=[prefix '/DepthImage_' num2str(idx+4,'%d'), '.png'];
+results=zeros(numpics,3);
+k=1;
+for idx=0:numpics
+    filename = [prefix box_name '/DepthImage_' num2str(idx+offset,'%d'), '.png']; % zero index filename
     D = imread(strcat(pwd, filename));
     fprintf(fileID,filename);
     fprintf(fileID,'\n');

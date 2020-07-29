@@ -20,7 +20,8 @@ else
 end
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
+% D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
@@ -166,7 +167,7 @@ figure(edge_figure);
 hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 200; % max allowable distance for inliers
+    maxDistance = 50; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -306,7 +307,7 @@ for j=1:4
     fprintf('dist%d=%.1f\n',j,dist);
 end
 distances=sort(distances);
-width=(distances(1)+distances(2))./2;
+width=(distances(1)+distances(2))/2;
 length=(distances(3)+distances(4))/2;
 dimension=[h length width];
 fprintf('Length=%.0f, Width=%.0f, Height=%.0f\n',dimension(2),dimension(3),dimension(1));
