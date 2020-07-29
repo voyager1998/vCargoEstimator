@@ -26,11 +26,11 @@ end
 % C*[x;y;z] = [px; py; z];
 % px = fx*x+offx*z;
 % py = fy*y+offy*z;
-% [px/z; py/z] = [i;j];
+% [px/z; py/z] = [j;i];
 % [px/z; py/z] = [fx*x/z + offx; fy*y/z+offy];
-% [fx*x/z; fy*y/z] = [i-offx; j-offy];
-% x = (i-offx)*z/fx;
-% y = (j-offy)*z/fy;
+% [fx*x/z; fy*y/z] = [j-offx; i-offy];
+% x = (j-offx)*z/fx;
+% y = (i-offy)*z/fy;
 % d = sqrt(x^2+y^2+z^2);
 % cos(theta) = z/d = 1/sqrt( ((j-offx)/fx)^2 + ((i-offy)/fy)^2 + 1)
 % z = d*cos(theta)

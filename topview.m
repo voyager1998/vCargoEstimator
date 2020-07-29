@@ -20,7 +20,8 @@ else
 end
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
+% D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
@@ -32,7 +33,7 @@ D_undistort = undistortImage(D,irCameraParams);
 D_undistort = bias(1).*D_undistort+bias(2);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
-pc_ir = tof2pc_mat(D_denoise, C_ir);
+pc_ir = tof2pc(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
@@ -82,10 +83,10 @@ upper_pos = worldToImage(irCameraParams,eye(3,3),zeros(3,1),plane_points{top_pla
 upper_pos = round(upper_pos);
 upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
 for i = 1:size(upper_pos, 1)
-    if abs(upper_pos(i,1))>480 || abs(upper_pos(i,2))>640
+    if abs(upper_pos(i,2))>480 || abs(upper_pos(i,1))>640
         continue;
     end
-    upper_2D(upper_pos(i,1), upper_pos(i,2)) = 1;
+    upper_2D(upper_pos(i,2), upper_pos(i,1)) = 1;
 end
 upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
 upper_2D = imfill(upper_2D, 'holes'); % fill in the holes
@@ -104,7 +105,7 @@ title("Edge of Upper plane");
 numlines = 4; % 4 edges of a rectangle
 
 [rows,cols]=find(upper_edge==true);
-edge_pts=[cols rows];
+edge_pts=[rows cols];
 line_2dmodels=zeros(numlines,2);
 k=1;
 figure(edge_figure);
@@ -122,7 +123,7 @@ for i=1:numlines
     line_2dmodels(k,:)=modelRANSAC;
     edge_pts(inlierIdx==1,:)=[];
     x = 0:640;
-    y = (x-modelRANSAC(2))/modelRANSAC(1);
+    y = x*modelRANSAC(1)+modelRANSAC(2);
     plot(x,y,'LineWidth',2)
     k=k+1;
 end
