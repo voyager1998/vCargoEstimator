@@ -20,8 +20,7 @@ else
 end
 
 % D must be a top view
-D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
-% D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
@@ -76,62 +75,7 @@ ylabel('Y');
 zlabel('Z');
 hold off;
 
-%% find edge from depth image
-% edge_thres = 0.01;
-% 
-% I = irCameraParams.Intrinsics;
-% % find region of interest
-% upper_pos = worldToImage(I,eye(3,3),zeros(3,1),plane_points{2}); % notice, here 2 represents the upper surface
-% upper_pos = round(upper_pos);
-% upper_2D = zeros(size(D)); % take the 3D points of upper plane to 2D
-% for i = 1:size(upper_pos, 1)
-%     if abs(upper_pos(i,1))>480 || abs(upper_pos(i,2))>640
-%         continue;
-%     end
-%     upper_2D(upper_pos(i,1), upper_pos(i,2)) = 1;
-% end
-% upper_2D = logical(upper_2D); % change from double 0,1 to logical 0,1
-% upper_2D_post = imfill(upper_2D, 'holes'); % fill in the holes
-% upper_2D_post = bwareaopen(upper_2D_post, 5000); % reject small objects
-% % find the rectangle that contain the upper plane
-% stats = regionprops(upper_2D_post);
-% enlarge_range = 15; % manually make the range larger
-% % notice BoundingBox =  [x y width height], but image is [col row], and col is reverse from y
-% row=stats.BoundingBox(1);
-% col=stats.BoundingBox(2);
-% w=stats.BoundingBox(3);
-% h=stats.BoundingBox(4);
-% col_min = round(col) - enlarge_range;
-% col_max = round(col + h) + enlarge_range;
-% row_min = round(row) - enlarge_range;
-% row_max = round(row + w) + enlarge_range;
-% if col_min<1
-%     col_min=1;
-% end
-% if col_max>480
-%     col_max=480;
-% end
-% if row_min<1
-%     row_min=1;
-% end
-% if row_max>640
-%     row_max=640;
-% end
-% 
-% D_smallPlane = D_denoise(col_min:col_max,row_min:row_max);
-% D_smallEdge = edge(D_smallPlane, 'Canny', edge_thres); % edge detection on the small portion of image
-% 
-% D_edge = zeros(size(D_denoise));
-% D_edge(col_min:col_max, row_min:row_max) = D_smallEdge;
-% 
-% upper_edge = bwareafilt(logical(D_edge),1); % always take out the biggest, somewhat brute force
-% edge_figure=image_counter;
-% figure(edge_figure);
-% image_counter = image_counter + 1;
-% imshow(upper_edge);
-% title("Edge of Upper plane");
-
-% Method1: directly fit edge on upper plane
+%% find edge from depth image - method1: directly fit edge on upper plane
 edge_thres = 0.1;
 % find region of interest
 upper_pos = worldToImage(irCameraParams,eye(3,3),zeros(3,1),plane_points{top_plane}); % notice, here 2 represents the upper surface
@@ -167,7 +111,7 @@ figure(edge_figure);
 hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 50; % max allowable distance for inliers
+    maxDistance = 30; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -178,7 +122,7 @@ for i=1:numlines
     line_2dmodels(k,:)=modelRANSAC;
     edge_pts(inlierIdx==1,:)=[];
     x = 0:640;
-    y = modelRANSAC(1)*x+modelRANSAC(2);
+    y = (x-modelRANSAC(2))/modelRANSAC(1);
     plot(x,y,'LineWidth',2)
     k=k+1;
 end
