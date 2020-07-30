@@ -20,20 +20,21 @@ else
 end
 
 % D must be a top view
-% D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
-D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
+D = imread(strcat(pwd, '/data/calibration0725/',box_name, '/DepthImage_0.png'));
+% D = imread(strcat(pwd, '/data/data0618_1/DepthImage_0.png'));
 load('calibration/panasonicIRcameraParams.mat');
 C_ir = irCameraParams.IntrinsicMatrix';
 
 % eliminate bias
 bias=load('bias_linear.mat').p; % bias transformation calculated from bias_cancellation.m 
+% bias=load('bias_pixelwise.mat');
 D=double(D);
 D = D/16;
 D_undistort = undistortImage(D,irCameraParams);
-D_undistort = bias(1).*D_undistort+bias(2);
+% D_undistort = bias(1).*D_undistort+bias(2);
 D_denoise = imbilatfilt(D_undistort, 1500, 5);
 
-pc_ir = tof2pc(D_denoise, C_ir);
+pc_ir = tof2pc_mat(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
 pc = pc_ir;
@@ -106,13 +107,14 @@ numlines = 4; % 4 edges of a rectangle
 
 [rows,cols]=find(upper_edge==true);
 edge_pts=[rows cols];
-line_2dmodels=zeros(numlines,2);
-k=1;
+original_num_pts = size(edge_pts, 1)
+line_2dmodels=zeros(numlines,3);
+k=0;
 figure(edge_figure);
 hold on
 for i=1:numlines
     sampleSize = 2; % number of points to sample per trial
-    maxDistance = 30; % max allowable distance for inliers
+    maxDistance = 5; % max allowable distance for inliers
 
     fitLineFcn = @(points) polyfit(points(:,2),points(:,1),1); % fit function using polyfit
     evalLineFcn = ...   % distance evaluation function
@@ -120,12 +122,35 @@ for i=1:numlines
 
     [modelRANSAC, inlierIdx] = ransac(edge_pts,fitLineFcn,evalLineFcn, ...
       sampleSize,maxDistance);
-    line_2dmodels(k,:)=modelRANSAC;
+    
     edge_pts(inlierIdx==1,:)=[];
+    if sum(inlierIdx==1) < original_num_pts / 8.0
+        continue
+    end
+    k=k+1;
+    line_2dmodels(k,:)=[modelRANSAC(1), -1, modelRANSAC(2)];
     x = 0:640;
     y = x*modelRANSAC(1)+modelRANSAC(2);
     plot(x,y,'LineWidth',2)
-    k=k+1;
+end
+if k < 4
+    for i=k+1:numlines
+        sampleSize = 2; % number of points to sample per trial
+        maxDistance = 5; % max allowable distance for inliers
+
+        fitLineFcn = @(points) polyfit(points(:,1),points(:,2),1); % fit function using polyfit
+        evalLineFcn = ...   % distance evaluation function
+          @(model, points) sum((points(:, 2) - polyval(model, points(:,1))).^2,2);
+
+        [modelRANSAC, inlierIdx] = ransac(edge_pts,fitLineFcn,evalLineFcn, ...
+          sampleSize,maxDistance);
+
+        edge_pts(inlierIdx==1,:)=[];
+        line_2dmodels(i,:)=[-1,modelRANSAC(1), modelRANSAC(2)];
+        y = 0:480;
+        x = y*modelRANSAC(1)+modelRANSAC(2);
+        plot(x,y,'LineWidth',2)
+    end
 end
 xlim([0 640]);
 ylim([0 480]);
