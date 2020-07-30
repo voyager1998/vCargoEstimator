@@ -3,30 +3,28 @@ clear;close all;
 image_counter = 1;
 addpath(pwd);
 addpath(strcat(pwd,'/utils'));
-
+prefix = '/data/calibration0725/';
 % select box to use
-box=1; % 1=boxA, 2=boxB, 3=boxC
+box=3; % 1=boxA, 2=boxB, 3=boxC
 if box==1
     true=[158.75,316, 296.75];
     box_name='boxA';
-    numpics=10;
+    numpics=40;
     offset=0;
 elseif box==2
     true=[275.15, 430.25, 307];
     box_name='boxB';
     offset=81;
-    numpics=20;
+    numpics=19;
 elseif box==3
     true=[109.5, 283.5, 177.5];
     box_name='boxC';
     offset=61;
-    numpics=20;
+    numpics=19;
 else
     error('Error: Please use correct box.\n');
 end
 trueV=true(1)*true(2)*true(3);
-
-prefix = '/data/calibration0725/';
 fileID = fopen(['result_' box_name '.txt'],'a'); % write results to file
 % Choose bias method
 bias_method=2; % 1=pixel-wise; 2=linear
@@ -57,6 +55,7 @@ fprintf(fileID,'-----------------------\n\n\n');
 fclose(fileID);
 
 %% visualize error
+% results(:,1)=results(:,1)/0.98;
 error=zeros(size(results,1),3);
 for i=1:size(results,1)
     error(i,1)=((results(i,1)-true(1))/true(1))*100;

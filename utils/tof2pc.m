@@ -7,7 +7,7 @@ ptcloud = zeros(w*h,3);
 n = 0;
 for j = 1: w
     for i = 1: h
-        if D(i,j) > 2000
+        if D(i,j) > 1000
             continue;
         end
         costheta = 1/sqrt( ((j-C(1,3))/C(1,1))^2 + ((i-C(2,3))/C(2,2))^2 + 1);

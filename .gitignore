@@ -1,9 +1,7 @@
 *.m~
 .DS_Store
-data/sum2018/*
-data/vid/*
-data/0604/*
-data/calibration0618/*
+data/*
+result*
 calibration/*.png
 venv/
 .vscode/
