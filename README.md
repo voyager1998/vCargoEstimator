@@ -4,8 +4,11 @@ Sponsored by Panasonic
 
 ## How to run
 ### Calibration
+Run 
+> python calibration/camera_calibration.py
+to get camera parameters for RGB camera and ToF camera, as well as stereo parameters for the two cameras.
 ### Test
-Run run.m in Matlab.
+Run run.m in Matlab to calculate length, width, height and volume for test data.
 
 ## Background
 In recent years, with the development of mobile Internet and the strong support of national policies, China's e-commerce market has grown. The increase in the number of online transactions in a geometric series has brought huge business opportunities to the logistics industry. But there are many new challenges. How to optimize every steps of express delivery, so that the goods can be efficient and safe Delivered to consumers? There are some problems including slow speed, tedious manual input, error in freight calculation, and abnormal measurement when using the traditional manual measurement method for the volume measurement of deliver goods. In order to solve these problems, saving enterprise labor and time costs, standardizing the measurement process, and improving efficiency. It has become more and more practical to develop a portable cargo volume measurement system.
