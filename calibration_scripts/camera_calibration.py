@@ -3,13 +3,12 @@ from __future__ import print_function
 import numpy as np
 import cv2
 import glob
-import yaml
 from utils import *
 
 
-class StereoCalibration(object):
+class CameraCalibration(object):
     '''Calibrate single camera parameters for RGB camera and ToF camera; Calibrate stereo parameters.'''
-    def __init__(self, filepath,square_size, height, width):
+    def __init__(self, square_size, width, height):
         # termination criteria
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         self.criteria_cal = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 1e-5)
@@ -23,44 +22,30 @@ class StereoCalibration(object):
         self.imgpoints_rgb = []  # 2d points in image plane.
         self.imgpoints_tof = []  # 2d points in image plane.
         self.img_shape = (640, 480)
-        self.camera_model = dict({
-            'leftMatrix': None, 'leftDist': None, 'leftROI': None, 'leftMap': None, 'leftStereo': None,
-            'rightMatrix': None, 'rightDist': None, 'rightROI': None, 'rightMap': None, 'rightStereo': None,
-            'R': None, 'T': None, 'E': None, 'F': None, 'disparityToDepthMap': None, 'wls_filter': None
-        })
+        self.square_size = square_size
+        self.width = width
+        self.height = height
 
-        self.read_images(filepath, width, height)
-        M1, d1, roiL, M2, d2, roiR = self.single_calibration()
-        self.camera_model['leftMatrix'] = M1
-        self.camera_model['leftDist'] = d1
-        self.camera_model['leftROI'] = roiL
-        self.camera_model['rightMatrix'] = M2
-        self.camera_model['rightDist'] = d2
-        self.camera_model['rightROI'] = roiR
-        # Alternatively, uncomment the following 2 lines 
-        # if already have camera parameters for each camera, can load from file
-        # self.camera_model['leftMatrix'], self.camera_model['leftDist'] = load_coefficients('./rgbCamera.yml')
-        # self.camera_model['rightMatrix'], self.camera_model['rightDist'] = load_coefficients('./irCamera.yml')
+        self.rgb = dict({'M': None, 'D': None})
+        self.tof = dict({'M': None, 'D': None})
+        self.stereo = dict({'R': None, 'T': None})
 
-        R, T, E, F = self.stereo_calibrate()
-        self.camera_model['R'] = R
-        self.camera_model['T'] = T
-        self.camera_model['E'] = E
-        self.camera_model['F'] = F
-        # Alternatively, uncomment the following 1 line
-        # if already have stereo parameters, can load from file
-        # self.camera_model['R'], self.camera_model['T'] = load_coefficients('stereo.yml')
 
-        print('\nSaving...')
-        save_rgb = 'rgbCamera.yml'
-        save_coefficients(self.camera_model['leftMatrix'], self.camera_model['leftDist'], save_rgb)
-        print('Intrinsic matrix and distortion for RGB camera is saved in ', save_rgb)
-        save_tof = 'irCamera.yml'
-        save_coefficients(self.camera_model['rightMatrix'], self.camera_model['rightDist'], save_tof)
-        print('Intrinsic matrix and distortion for ToF camera is saved in ', save_tof)
-        save_stereo = 'stereo.yml'
-        save_coefficients(self.camera_model['R'], self.camera_model['T'], save_stereo)
-        print('Rotation matrix and transformation vector for stereo camera is saved in ', save_rgb)
+    def find_corners(self, gray, ifVisualization=False):
+        '''Find corners in the img.'''
+        ret, corners = cv2.findChessboardCorners(
+            gray, (self.width, self.height), None)  # corners: 1 x 2 matrix
+        if ret == False:
+            print("Corners not found")
+        else:
+            cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), self.criteria)
+            if ifVisualization:
+                cornerimg = gray.copy()
+                cornerimg = cv2.drawChessboardCorners(
+                    cornerimg, (self.width, self.height), corners, ret)
+                cv2.imshow('chessboard', cornerimg)
+                cv2.waitKey(0)
+        return ret, corners
 
 
     def read_images(self, filepath, width, height):
@@ -76,28 +61,14 @@ class StereoCalibration(object):
             img_tof = cv2.imread(images_tof[i])
             gray_rgb = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
             gray_tof = cv2.cvtColor(img_tof, cv2.COLOR_BGR2GRAY)
-
             # Find the chess board corners
-            ret_rgb, corners_rgb = cv2.findChessboardCorners(gray_rgb, (width, height), None)
-            ret_tof, corners_tof = cv2.findChessboardCorners(gray_tof, (width, height), None)
-
+            ret_rgb, corners_rgb = self.find_corners(gray_rgb)
+            ret_tof, corners_tof = self.find_corners(gray_tof)
             if ret_rgb is True and ret_tof is True:
                 # If found, add object points, image points (after refining them)
                 self.objpoints.append(self.objp)
-
-                cv2.cornerSubPix(gray_rgb, corners_rgb, (11, 11), (-1, -1), self.criteria)
                 self.imgpoints_rgb.append(corners_rgb)
-                # Draw and display the corners
-                # img_rgb = cv2.drawChessboardCorners(img_rgb, (width, height), corners_rgb, ret_rgb)
-                # cv2.imshow(images_rgb[i], img_rgb)
-                # cv2.waitKey(500)
-
-                cv2.cornerSubPix(gray_tof, corners_tof, (11, 11), (-1, -1), self.criteria)
                 self.imgpoints_tof.append(corners_tof)
-                # Draw and display the corners
-                # img_tof = cv2.drawChessboardCorners(img_tof, (width, height), corners_tof, ret_tof)
-                # cv2.imshow(images_tof[i], img_tof)
-                # cv2.waitKey(500)
 
 
     def single_calibration(self):
@@ -112,27 +83,54 @@ class StereoCalibration(object):
         retR, mtxR, distR, rvecsR, tvecsR = cv2.calibrateCamera(self.objpoints,self.imgpoints_tof,self.img_shape,None,None)
         hR, wR = [480, 640] # hR,wR= ChessImaR.shape[:2]
         OmtxR, roiR= cv2.getOptimalNewCameraMatrix(mtxR,distR,(wR,hR),1,(wR,hR))
-        return [mtxL, distL, roiL, mtxR, distR, roiR]
+
+        self.rgb['M'] = mtxL
+        self.rgb['D'] = distL
+        self.tof['M'] = mtxR
+        self.tof['D'] = distR
 
 
     def stereo_calibrate(self):
         '''Calibrate for stereo parameters.'''
         print('\nStart stereo calibration...')
-        M1 = self.camera_model['leftMatrix']
-        d1 = self.camera_model['leftDist']
-        M2 = self.camera_model['rightMatrix']
-        d2 = self.camera_model['rightDist']
+        M1 = self.rgb['M']
+        d1 = self.rgb['D']
+        M2 = self.tof['M']
+        d2 = self.tof['D']
         flags = cv2.CALIB_FIX_INTRINSIC
         stereocalib_criteria = (cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, 100, 1e-5)
         ret, M1, d1, M2, d2, R, T, E, F = cv2.stereoCalibrate(
             self.objpoints, self.imgpoints_rgb, self.imgpoints_tof, M1, d1, M2, d2, 
             self.img_shape, criteria=stereocalib_criteria, flags=flags)
-        return [R, T, E, F]
+
+        self.stereo['R'] = R
+        self.stereo['T'] = T
+
+    
+    def load_cameraModel(self, rgbModel, tofModel, stereoModel):
+        self.rgb['M'], self.rgb['D'] = load_coefficients('./rgbCamera.yml')
+        self.tof['M'], self.tof['D'] = load_coefficients('./irCamera.yml')
+        self.stereo['R'], self.stereo['T'] = load_coefficients('stereo.yml')
 
 
 if __name__ == '__main__':
-    filepath = '../data/calibration' # contain two folders "rgb" and "tof"
     square_size = 26.3571
     height = 5
     width = 6
-    cal_data = StereoCalibration(filepath,square_size,height,width)
+    calibration = CameraCalibration(square_size, width, height)
+
+    filepath = '../data/calibration' # contain two folders "rgb" and "tof"
+    calibration.read_images(filepath, width, height)
+    calibration.single_calibration()
+    calibration.stereo_calibrate()
+
+    print('\nSaving...')
+    save_rgb = 'rgbCamera.yml'
+    save_coefficients(calibration.rgb['M'], calibration.rgb['D'], save_rgb)
+    print('Intrinsic matrix and distortion for RGB camera is saved in ', save_rgb)
+    save_tof = 'irCamera.yml'
+    save_coefficients(calibration.tof['M'], calibration.tof['D'], save_tof)
+    print('Intrinsic matrix and distortion for ToF camera is saved in ', save_tof)
+    save_stereo = 'stereo.yml'
+    save_coefficients(calibration.stereo['R'], calibration.stereo['T'], save_stereo)
+    print('Rotation matrix and transformation vector for stereo camera is saved in ', save_rgb)
