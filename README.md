@@ -6,6 +6,7 @@ Sponsored by Panasonic
 ### Calibration
 Run 
 > python calibration/camera_calibration.py
+
 to get camera parameters for RGB camera and ToF camera, as well as stereo parameters for the two cameras.
 ### Test
 Run run.m in Matlab to calculate length, width, height and volume for test data.
