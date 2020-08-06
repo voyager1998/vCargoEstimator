@@ -33,16 +33,14 @@ def fit_and_plot(allgtDistances, alltofs, allstereo_distances):
     plt.plot(alltofs, allgtDistances, 'ro', label='gt vs. tof')
     plt.plot(alltofs, allstereo_distances, 'yo', label='stereo vs. tof')
 
-    A = np.vstack([alltofs, np.ones(len(alltofs))]).T
-    m, c = np.linalg.lstsq(A, allgtDistances, rcond=None)[0]
-    print("----------- Result: y = ", m, " * x + ", c)
-    plt.plot(alltofs, m * np.array(alltofs) + c,
-             'b', label='Fitted line')
+    m = sum(allgtDistances)/sum(alltofs)
+    plt.plot(alltofs, sum(allgtDistances)/sum(alltofs) * np.array(alltofs),
+             'y', label='Fitted line')
     plt.legend()
     plt.xlabel('tof camera value')
     plt.ylabel('ground truth value')
     plt.show()
-    return [m, c]
+    return m
 
 
 def draw(img, corner, imgpts):
