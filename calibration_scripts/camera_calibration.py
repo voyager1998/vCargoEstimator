@@ -50,7 +50,7 @@ class CameraCalibration(object):
 
     def read_images(self, filepath, width, height):
         '''Load rgb and ir images and detect corners for each image.'''
-        print('\nStart reading images...')
+        print('Reading images...\n')
         images_rgb = glob.glob(filepath + '/rgb/*.png')
         images_tof = glob.glob(filepath + '/ir/*.png')
         images_rgb.sort()
@@ -73,7 +73,7 @@ class CameraCalibration(object):
 
     def single_calibration(self):
         '''Calibrate for single camera.'''
-        print('\nStart single camera calibration...')
+        print('Start single camera calibration...\n')
         # RGB camera
         retL, mtxL, distL, rvecsL, tvecsL = cv2.calibrateCamera(self.objpoints,self.imgpoints_rgb,self.img_shape,None,None)
         hL, wL = [480, 640] # hL,wL= ChessImaL.shape[:2]
@@ -90,9 +90,9 @@ class CameraCalibration(object):
         self.tof['D'] = distR
 
 
-    def stereo_calibrate(self):
+    def stereo_calibration(self):
         '''Calibrate for stereo parameters.'''
-        print('\nStart stereo calibration...')
+        print('Start stereo calibration...\n')
         M1 = self.rgb['M']
         d1 = self.rgb['D']
         M2 = self.tof['M']
@@ -108,6 +108,7 @@ class CameraCalibration(object):
 
     
     def load_cameraModel(self, rgbModel, tofModel, stereoModel):
+        '''Load previously calibrated camera model.'''
         self.rgb['M'], self.rgb['D'] = load_coefficients('./rgbCamera.yml')
         self.tof['M'], self.tof['D'] = load_coefficients('./irCamera.yml')
         self.stereo['R'], self.stereo['T'] = load_coefficients('stereo.yml')
@@ -122,9 +123,9 @@ if __name__ == '__main__':
     filepath = '../data/calibration' # contain two folders "rgb" and "tof"
     calibration.read_images(filepath, width, height)
     calibration.single_calibration()
-    calibration.stereo_calibrate()
+    calibration.stereo_calibration()
 
-    print('\nSaving...')
+    print('Saving...')
     save_rgb = 'rgbCamera.yml'
     save_coefficients(calibration.rgb['M'], calibration.rgb['D'], save_rgb)
     print('Intrinsic matrix and distortion for RGB camera is saved in ', save_rgb)
