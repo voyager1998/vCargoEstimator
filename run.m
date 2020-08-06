@@ -5,7 +5,7 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 addpath(strcat(pwd,'/calibration'));
 
-depth_file='/data/boxA/DepthImage_0.png';
+depth_file='/data/testing/boxA/DepthImage_0.png';
 bias_file='calibration/bias.mat';
 intrinsic_file='calibration/panasonicIRcameraParams.mat';
 
