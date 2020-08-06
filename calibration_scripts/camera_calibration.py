@@ -120,7 +120,7 @@ if __name__ == '__main__':
     width = 6
     calibration = CameraCalibration(square_size, width, height)
 
-    filepath = '../data/calibration' # contain two folders "rgb" and "tof"
+    filepath = '../data/calibration' # contain two folders "rgb" and "ir"
     calibration.read_images(filepath, width, height)
     calibration.single_calibration()
     calibration.stereo_calibration()
