@@ -116,8 +116,8 @@ class CameraCalibration(object):
 
 if __name__ == '__main__':
     square_size = 26.3571
-    height = 5
     width = 6
+    height = 5
     calibration = CameraCalibration(square_size, width, height)
 
     filepath = '../data/calibration' # contain two folders "rgb" and "ir"

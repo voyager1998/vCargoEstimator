@@ -27,7 +27,7 @@ def cv_dist(irimg, cal_obj, ifVisualization=False):
     if ret == True:
         cal_obj.imgpoints_tof.append(corners)
         # find the rotation and translation vectors
-        ret, rvecs, tvecs = cv2.solvePnP(cal_obj.objp, corners, cal_obj.rgb['M'], cal_obj.rgb['D'])
+        ret, rvecs, tvecs = cv2.solvePnP(cal_obj.objp, corners, cal_obj.tof['M'], cal_obj.tof['D'])
         rvecsM, _ = cv2.Rodrigues(rvecs)
 
         # project 3D corners to image plane
@@ -40,8 +40,8 @@ def cv_dist(irimg, cal_obj, ifVisualization=False):
                 axis_length = 2 * calibrationObj.square_size
                 axis = np.float32([[axis_length, 0, 0], [0, axis_length, 0], [
                       0, 0, -axis_length]]).reshape(-1, 3)
-                visual_tf(irimg, objp[i], axis, rvecs,
-                          tvecs, mtx, dist, corners_ir[i])
+                visual_tf(irimg, cal_obj.objp[i], axis, rvecs,
+                          tvecs, cal_obj.tof['M'], cal_obj.tof['D'], corners[i])
     cv2.destroyAllWindows()
     return ret, cvDistances
 
@@ -69,9 +69,8 @@ def stereo_dist(rgbimg, cal_obj):
     return [retRGB, stereoDistances]
 
 
-def calibrateDepth(cal_obj, irPrefix='GrayImage_', depthPrefix='DepthImage_', rgbPrefix='RGBImage_',
-                   imgID='*', image_format='png', dirpath='../data/calibration0712/plane*',
-                   ifVisualization=False, ifDivide16=False, ifUseRGB=True):
+def calibrateDepth(cal_obj, dirpath, irPrefix='GrayImage_', depthPrefix='DepthImage_', rgbPrefix='RGBImage_',
+                   imgID='*', image_format='png', ifVisualization=False, ifDivide16=False, ifUseRGB=True):
     """ Apply camera calibration operation for images in the given directory path. """
     gtDistances = []
     tofDistances = []
@@ -101,14 +100,17 @@ def calibrateDepth(cal_obj, irPrefix='GrayImage_', depthPrefix='DepthImage_', rg
         gtDistances += cv_dists
         tofDistances += tof_dists
         stereoDistances += stereo_dists
-
+        # print("-----image ", fname, "-----")
+        # for i in range(len(cv_dists)):
+        #     print('corner {:02d} has gt = {:.1f}, tof = {:.1f}, stereo = {:.1f}'.format(
+        #         i, cv_dists[i], tof_dists[i], stereo_dists[i]))
     return [gtDistances, tofDistances, stereoDistances]
 
 
 if __name__ == '__main__':
     square_size = 26.3571
-    height = 5
     width = 6
+    height = 5
     cal_obj = CameraCalibration(square_size, width, height)
     rgbModel = 'rgbCamera.yml'
     tofModel = 'irCamera.yml'
@@ -116,12 +118,9 @@ if __name__ == '__main__':
     cal_obj.load_cameraModel(rgbModel, tofModel, stereoModel)
 
     dirpath = '../data/bias_calibration/corner*'
-    gtDistances, tofs, stereo_distances = calibrateDepth(
-        cal_obj, irPrefix='Gray_', depthPrefix='DepthImage_', rgbPrefix='RBG_', imgID='*', 
-        dirpath=dirpath, ifVisualization=False, ifDivide16=True, ifUseRGB=True)
+    gtDistances, tofs, stereo_distances = calibrateDepth(cal_obj, dirpath,
+            irPrefix='Gray_', depthPrefix='DepthImage_', rgbPrefix='RBG_',
+            ifVisualization=False, ifDivide16=True, ifUseRGB=True)
 
-    m,c = fit_and_plot(gtDistances, tofs, stereo_distances)
-
-    # save bias elimination coefficient to file
-    save_file = 'tofCamera.yml'
-    save_coefficients(m, c, save_file)
+    m = fit_and_plot(gtDistances, tofs, stereo_distances)
+    print("----------- Result: y = ", m, " * x")
