@@ -173,6 +173,8 @@ else
      
      rc = 1;
      
+     u=u/norm(u);
+     
 end
 
 
