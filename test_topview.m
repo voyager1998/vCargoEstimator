@@ -5,11 +5,11 @@ addpath(pwd);
 addpath(strcat(pwd,'/utils'));
 prefix = '/data/calibration0725/';
 % select box to use
-box=3; % 1=boxA, 2=boxB, 3=boxC
+box=4; % 1=boxA, 2=boxB, 3=boxC, 4=boxE(boxD)
 if box==1
     true=[158.75,316, 296.75];
     box_name='boxA';
-    numpics=40;
+    numpics=20;
     offset=0;
 elseif box==2
     true=[275.15, 430.25, 307];
@@ -21,6 +21,12 @@ elseif box==3
     box_name='boxC';
     offset=61;
     numpics=19;
+elseif box==4
+    prefix='/data/';
+    true=[500,600,400];
+    box_name='boxE';
+    offset=0;
+    numpics=4;
 else
     error('Error: Please use correct box.\n');
 end
@@ -31,7 +37,9 @@ bias_method=2; % 1=pixel-wise; 2=linear
 fprintf(fileID,'bias_method=%d\n',bias_method);
 
 %% Calculate
-results=zeros(numpics,3);
+tic
+results1=zeros(numpics,1);
+results2=zeros(numpics,1);
 k=1;
 for idx=0:numpics
     filename = [prefix box_name '/DepthImage_' num2str(idx+offset,'%d'), '.png']; % zero index filename
@@ -53,6 +61,7 @@ end
 
 fprintf(fileID,'-----------------------\n\n\n');
 fclose(fileID);
+time = toc;
 
 %% visualize error
 % results(:,1)=results(:,1)/0.98;
@@ -66,15 +75,18 @@ end
 x=1:1:size(error,1);
 y1=ones(size(error,1));
 X=[1 1 size(error,1) size(error,1)];
-Y=[1 -1 -1 1];
+Y=[3 -3 -3 3];
 figure;
 hold on
-fill(X,Y,'y')
-plot(x,error(:,1),'b*--')
-plot(x,error(:,2),'g*--')
-plot(x,error(:,3),'r*--')
-plot(x,error(:,4),'k*-')
+f=fill(X,Y,'y');
+set(f,'facealpha',.3)
+plot(x,error(:,1),'b.','MarkerSize',20)
+plot(x,error(:,2),'g.','MarkerSize',20)
+plot(x,error(:,3),'r.','MarkerSize',20)
+plot(x,error(:,4),'k*','MarkerSize',10)
 xlabel('experiment no.')
 ylabel('error %')
 legend('ideal error boundary','height','length','width','volume')
-title('error%');
+xlim([1 numpics+1])
+ylim([-5 5])
+title(box_name);

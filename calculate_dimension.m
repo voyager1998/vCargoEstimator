@@ -34,7 +34,6 @@ pc_ir = tof2pc_mat(D_denoise, C_ir);
 
 %% RANSAC fit plane from tof's pc
 numplanes = 2; % topview fit 2 planes
-
 iterations = 100;
 subset_size = 3;
 
@@ -45,33 +44,30 @@ figure(ransac_figure);
 hold on
 plane_models = zeros(numplanes,4);
 plane_points{1,numplanes} = [];
-top_plane=1;
 for i = 1:numplanes
-    inlier_thres = 10;
-    if (i == 1) 
-        inlier_thres = 30;
-    end
+    inlier_thres = 30;
+%     if (i == 1) 
+%         inlier_thres = 30;
+%     end
     noise_ths = ones(1, length(pc)) * inlier_thres;
     [plane_models(i,:), outlier_ratio, plane_area, inliers, best_inliers] ...
         = ransac_fitplane(pc, 1:length(pc), noise_ths, iterations, subset_size);
-    % find top plane
-    if i>1 && top_plane==1 % i=1 often is ground
-        n1=plane_models(1,1:3);
-        n2=plane_models(i,1:3);
-        if abs((n1*n2')/(norm(n1).*norm(n2)))>0.5 % parallel planes
-            top_plane=i;
-        end
-    end
     pc(best_inliers, :) = [];
     plane_points{i} = inliers;
     pcshow(inliers, [bitshift(bitand(i,4),-2) bitshift(bitand(i,2),-1) bitand(i,1)]);
 end
-% plane1 blue, plane2 green, plane3 cyan, plane4 red
 title('fit plane using pc');
 xlabel('X');
 ylabel('Y');
 zlabel('Z');
 hold off;
+
+% We need to make sure Plane1 is groud, Plane2 is top surface
+if ( -plane_models(1,4)/plane_models(1,3) < -plane_models(2,4)/plane_models(2,3) ) 
+    plane_models([1 2],:) = plane_models([2 1],:);
+    plane_points([1 2]) = plane_points([2 1]);
+end
+top_plane=2;
 
 %% Find edges - method1: directly fit edge on upper plane
 edge_thres = 0.1;

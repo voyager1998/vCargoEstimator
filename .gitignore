@@ -4,5 +4,6 @@ data/*
 result*
 calibration/*.png
 venv/
+*.ipynb
 .vscode/
 __pycache__/
