@@ -4,3 +4,5 @@ __pycache__/
 *.py[cod]
 *.yml
 \venv
+.vscode/*
+data/*
